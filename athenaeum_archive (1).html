@@ -1,0 +1,2937 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Athenaeum of the Veil — Archive</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════
+   CORE VARIABLES & RESET
+═══════════════════════════════════════════════════ */
+:root {
+  --black:       #000000;
+  --deep:        #050508;
+  --void:        #08080f;
+  --shadow:      #0d0d1a;
+  --midnight:    #111122;
+  --dusk:        #1a1a2e;
+  --silver-dim:  #4a4a6a;
+  --silver-mid:  #7a7aaa;
+  --silver:      #aaaacc;
+  --silver-bright: #c8c8e8;
+  --silver-pure: #d4d4f0;
+  --silver-glow: #e0e0ff;
+  --argent:      #f0f0ff;
+  --white-moon:  #fafaff;
+  --gold-moon:   #c8b870;
+  --frost:       #a8d8f0;
+  --cosmic:      #8888cc;
+  --night-blue:  #223355;
+  --font-display: 'Cinzel Decorative', serif;
+  --font-heading: 'Cinzel', serif;
+  --font-body:    'EB Garamond', serif;
+  --glow-sm: 0 0 8px rgba(200,200,240,0.4);
+  --glow-md: 0 0 20px rgba(200,200,240,0.3), 0 0 40px rgba(150,150,220,0.15);
+  --glow-lg: 0 0 30px rgba(200,200,240,0.4), 0 0 60px rgba(150,150,220,0.2), 0 0 100px rgba(100,100,200,0.1);
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--black);
+  color: var(--silver-bright);
+  font-family: var(--font-body);
+  font-size: 18px;
+  line-height: 1.7;
+  overflow-x: hidden;
+  cursor: default;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--void); }
+::-webkit-scrollbar-thumb { background: var(--silver-dim); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--silver); }
+
+/* Custom cursor */
+body { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='10' r='3' fill='none' stroke='%23c8c8e8' stroke-width='1'/%3E%3Cline x1='10' y1='0' x2='10' y2='6' stroke='%23c8c8e8' stroke-width='1'/%3E%3Cline x1='10' y1='14' x2='10' y2='20' stroke='%23c8c8e8' stroke-width='1'/%3E%3Cline x1='0' y1='10' x2='6' y2='10' stroke='%23c8c8e8' stroke-width='1'/%3E%3Cline x1='14' y1='10' x2='20' y2='10' stroke='%23c8c8e8' stroke-width='1'/%3E%3C/svg%3E") 10 10, crosshair; }
+
+/* ═══════════════════════════════════════════════════
+   STAR FIELD BACKGROUND
+═══════════════════════════════════════════════════ */
+.starfield {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.star {
+  position: absolute;
+  border-radius: 50%;
+  background: white;
+  animation: twinkle var(--dur, 3s) ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+  opacity: var(--base-opacity, 0.4);
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: var(--base-opacity, 0.4); transform: scale(1); }
+  50% { opacity: calc(var(--base-opacity, 0.4) * 2.5); transform: scale(1.3); }
+}
+
+/* ═══════════════════════════════════════════════════
+   FILIGREE SVG DECORATIONS
+═══════════════════════════════════════════════════ */
+.filigree-corner {
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  pointer-events: none;
+  opacity: 0.5;
+}
+.filigree-corner.tl { top: 0; left: 0; transform: none; }
+.filigree-corner.tr { top: 0; right: 0; transform: scaleX(-1); }
+.filigree-corner.bl { bottom: 0; left: 0; transform: scaleY(-1); }
+.filigree-corner.br { bottom: 0; right: 0; transform: scale(-1); }
+
+.filigree-divider {
+  width: 100%;
+  height: 30px;
+  opacity: 0.4;
+  margin: 1rem 0;
+}
+
+/* ═══════════════════════════════════════════════════
+   PAGE SYSTEM
+═══════════════════════════════════════════════════ */
+.page {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.8s ease, transform 0.8s ease;
+  overflow: hidden;
+}
+.page.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-20px);
+}
+.page.gone { display: none; }
+
+/* ═══════════════════════════════════════════════════
+   LOADING SCREEN
+═══════════════════════════════════════════════════ */
+#page-loading {
+  background: var(--black);
+  flex-direction: column;
+  gap: 2rem;
+  z-index: 100;
+}
+
+.loading-moon {
+  width: 100px;
+  height: 100px;
+  position: relative;
+  animation: moonPulse 2s ease-in-out infinite;
+}
+
+@keyframes moonPulse {
+  0%, 100% { filter: drop-shadow(0 0 10px rgba(200,200,255,0.5)); transform: scale(1); }
+  50% { filter: drop-shadow(0 0 30px rgba(200,200,255,0.9)); transform: scale(1.05); }
+}
+
+.loading-ring {
+  position: absolute;
+  inset: -15px;
+  border-radius: 50%;
+  border: 1px solid rgba(200,200,255,0.2);
+  animation: ringExpand 2s ease-out infinite;
+}
+.loading-ring:nth-child(2) { animation-delay: 0.6s; }
+.loading-ring:nth-child(3) { animation-delay: 1.2s; }
+
+@keyframes ringExpand {
+  0% { transform: scale(0.8); opacity: 0.8; }
+  100% { transform: scale(1.8); opacity: 0; }
+}
+
+.loading-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.2rem, 3vw, 1.8rem);
+  color: var(--silver-pure);
+  text-align: center;
+  animation: titlePulse 1.5s ease-in-out infinite;
+  letter-spacing: 0.15em;
+  text-shadow: var(--glow-md);
+}
+
+@keyframes titlePulse {
+  0%, 100% { opacity: 0.8; text-shadow: 0 0 20px rgba(200,200,255,0.4); }
+  50% { opacity: 1; text-shadow: 0 0 40px rgba(200,200,255,0.8), 0 0 80px rgba(150,150,220,0.4); }
+}
+
+.loading-subtitle {
+  font-family: var(--font-heading);
+  font-size: 0.9rem;
+  color: var(--silver-mid);
+  letter-spacing: 0.25em;
+  text-align: center;
+  height: 1.5em;
+  position: relative;
+}
+
+.loading-sub-text {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.loading-sub-text.active { opacity: 1; }
+
+.loading-bar-container {
+  width: 300px;
+  height: 1px;
+  background: rgba(200,200,255,0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.loading-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, transparent, var(--silver-pure), transparent);
+  transition: width 5s linear;
+  box-shadow: 0 0 10px var(--silver-pure);
+}
+
+.loading-runes {
+  display: flex;
+  gap: 1.5rem;
+  opacity: 0.3;
+}
+
+.rune-symbol {
+  font-family: var(--font-heading);
+  font-size: 1.2rem;
+  color: var(--silver);
+  animation: runeFlicker 2s ease-in-out infinite;
+}
+.rune-symbol:nth-child(1) { animation-delay: 0s; }
+.rune-symbol:nth-child(2) { animation-delay: 0.3s; }
+.rune-symbol:nth-child(3) { animation-delay: 0.6s; }
+.rune-symbol:nth-child(4) { animation-delay: 0.9s; }
+.rune-symbol:nth-child(5) { animation-delay: 1.2s; }
+
+@keyframes runeFlicker {
+  0%, 100% { opacity: 0.3; text-shadow: none; }
+  50% { opacity: 1; text-shadow: 0 0 10px var(--silver); }
+}
+
+/* ═══════════════════════════════════════════════════
+   HOME / CATEGORY SELECTION
+═══════════════════════════════════════════════════ */
+#page-home {
+  background: var(--deep);
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  overflow-y: auto;
+  padding: 3rem 2rem;
+  position: fixed;
+  inset: 0;
+}
+
+.home-header {
+  text-align: center;
+  margin-bottom: 3rem;
+  position: relative;
+  z-index: 2;
+}
+
+.home-moon-emblem {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 1.5rem;
+  animation: emblemFloat 4s ease-in-out infinite;
+  filter: drop-shadow(0 0 15px rgba(200,200,255,0.5));
+}
+
+@keyframes emblemFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.home-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 4vw, 2.8rem);
+  color: var(--white-moon);
+  letter-spacing: 0.1em;
+  text-shadow: var(--glow-lg);
+  line-height: 1.2;
+  margin-bottom: 0.5rem;
+}
+
+.home-subtitle {
+  font-family: var(--font-heading);
+  font-size: 0.85rem;
+  color: var(--silver-mid);
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+}
+
+.home-epigraph {
+  font-family: var(--font-body);
+  font-style: italic;
+  font-size: 1rem;
+  color: var(--silver-dim);
+  max-width: 500px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.categories-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  max-width: 1100px;
+  width: 100%;
+  position: relative;
+  z-index: 2;
+}
+
+.category-card {
+  background: linear-gradient(135deg, rgba(10,10,20,0.95), rgba(15,15,30,0.9));
+  border: 1px solid rgba(150,150,200,0.15);
+  padding: 2rem;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  text-align: center;
+}
+
+.category-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, rgba(180,180,255,0.05) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.category-card::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  background: linear-gradient(135deg, rgba(200,200,255,0.3), transparent 40%, transparent 60%, rgba(200,200,255,0.3));
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.category-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(200,200,255,0.4);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 40px rgba(150,150,220,0.15);
+}
+.category-card:hover::before { opacity: 1; }
+.category-card:hover::after { opacity: 1; }
+
+.category-card:hover .card-icon {
+  filter: drop-shadow(0 0 15px rgba(200,200,255,0.8));
+  transform: scale(1.1) rotate(5deg);
+}
+
+.card-corner {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  opacity: 0.3;
+  transition: opacity 0.4s ease;
+}
+.card-corner.tl { top: 0; left: 0; }
+.card-corner.tr { top: 0; right: 0; transform: scaleX(-1); }
+.card-corner.bl { bottom: 0; left: 0; transform: scaleY(-1); }
+.card-corner.br { bottom: 0; right: 0; transform: scale(-1); }
+.category-card:hover .card-corner { opacity: 0.8; }
+
+.card-icon {
+  width: 50px;
+  height: 50px;
+  margin: 0 auto 1rem;
+  transition: all 0.4s ease;
+  filter: drop-shadow(0 0 5px rgba(200,200,255,0.3));
+}
+
+.card-number {
+  font-family: var(--font-heading);
+  font-size: 0.65rem;
+  color: var(--silver-dim);
+  letter-spacing: 0.4em;
+  margin-bottom: 0.5rem;
+}
+
+.card-title {
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  color: var(--silver-pure);
+  letter-spacing: 0.08em;
+  margin-bottom: 0.8rem;
+  font-weight: 600;
+}
+
+.card-desc {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  color: var(--silver-mid);
+  line-height: 1.5;
+  font-style: italic;
+}
+
+.card-entries {
+  margin-top: 1rem;
+  font-family: var(--font-heading);
+  font-size: 0.65rem;
+  color: var(--silver-dim);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.card-shimmer {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.03), transparent);
+  transition: left 0.6s ease;
+}
+.category-card:hover .card-shimmer { left: 150%; }
+
+/* ═══════════════════════════════════════════════════
+   ARCHIVE PAGE
+═══════════════════════════════════════════════════ */
+#page-archive {
+  background: var(--deep);
+  align-items: flex-start;
+  justify-content: flex-start;
+  overflow-y: auto;
+  overflow-x: hidden;
+  flex-direction: row;
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+}
+
+/* Navigation sidebar */
+.archive-nav {
+  width: 280px;
+  min-width: 280px;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  background: rgba(5,5,12,0.98);
+  border-right: 1px solid rgba(150,150,200,0.12);
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 2rem 0;
+  z-index: 20;
+  flex-shrink: 0;
+}
+
+.nav-header {
+  padding: 0 1.5rem 1.5rem;
+  border-bottom: 1px solid rgba(150,150,200,0.1);
+  margin-bottom: 1rem;
+}
+
+.nav-back-btn {
+  font-family: var(--font-heading);
+  font-size: 0.7rem;
+  color: var(--silver-dim);
+  letter-spacing: 0.25em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  transition: color 0.3s ease;
+  text-transform: uppercase;
+}
+.nav-back-btn:hover { color: var(--silver-pure); }
+.nav-back-btn::before { content: '◁'; font-size: 0.8rem; }
+
+.nav-archive-title {
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+  color: var(--silver-bright);
+  letter-spacing: 0.05em;
+  line-height: 1.3;
+}
+
+.nav-section {
+  padding: 0.2rem 0;
+}
+
+.nav-item {
+  padding: 0.5rem 1.5rem;
+  font-family: var(--font-heading);
+  font-size: 0.75rem;
+  color: var(--silver-dim);
+  letter-spacing: 0.12em;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  display: block;
+  text-decoration: none;
+  border-left: 2px solid transparent;
+  line-height: 1.4;
+}
+
+.nav-item:hover {
+  color: var(--silver-bright);
+  border-left-color: rgba(200,200,255,0.5);
+  background: rgba(200,200,255,0.03);
+  padding-left: 2rem;
+}
+
+.nav-item.active {
+  color: var(--silver-pure);
+  border-left-color: var(--silver);
+  background: rgba(200,200,255,0.05);
+}
+
+.nav-item.sub {
+  padding-left: 2.5rem;
+  font-size: 0.7rem;
+  color: rgba(100,100,150,0.8);
+}
+.nav-item.sub:hover { padding-left: 3rem; color: var(--silver); }
+
+.nav-divider {
+  height: 1px;
+  background: rgba(150,150,200,0.08);
+  margin: 0.8rem 1.5rem;
+}
+
+.nav-label {
+  padding: 0.8rem 1.5rem 0.3rem;
+  font-family: var(--font-heading);
+  font-size: 0.6rem;
+  color: rgba(100,100,150,0.6);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+
+/* Archive content */
+.archive-content {
+  flex: 1;
+  padding: 3rem 4rem;
+  max-width: 900px;
+  position: relative;
+  min-height: 100vh;
+}
+
+.archive-page-header {
+  margin-bottom: 4rem;
+  position: relative;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid rgba(150,150,200,0.15);
+}
+
+.archive-page-icon {
+  width: 60px;
+  height: 60px;
+  margin-bottom: 1.5rem;
+  filter: drop-shadow(0 0 15px rgba(200,200,255,0.5));
+  animation: iconGlow 3s ease-in-out infinite;
+}
+
+@keyframes iconGlow {
+  0%, 100% { filter: drop-shadow(0 0 10px rgba(200,200,255,0.4)); }
+  50% { filter: drop-shadow(0 0 25px rgba(200,200,255,0.7)); }
+}
+
+.archive-page-label {
+  font-family: var(--font-heading);
+  font-size: 0.7rem;
+  color: var(--silver-dim);
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+.archive-page-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 4vw, 3rem);
+  color: var(--white-moon);
+  text-shadow: var(--glow-md);
+  line-height: 1.2;
+  margin-bottom: 0.5rem;
+}
+
+.archive-page-epigraph {
+  font-family: var(--font-body);
+  font-style: italic;
+  font-size: 1rem;
+  color: var(--silver-dim);
+  max-width: 600px;
+  line-height: 1.7;
+  margin-top: 1rem;
+}
+
+/* Archive sections */
+.archive-section {
+  margin-bottom: 5rem;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.archive-section.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.section-anchor {
+  position: relative;
+  top: -100px;
+  display: block;
+  visibility: hidden;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+.section-number {
+  font-family: var(--font-heading);
+  font-size: 0.65rem;
+  color: var(--silver-dim);
+  letter-spacing: 0.3em;
+  min-width: 3rem;
+}
+
+.section-title {
+  font-family: var(--font-heading);
+  font-size: 1.4rem;
+  color: var(--silver-pure);
+  letter-spacing: 0.06em;
+  font-weight: 600;
+  position: relative;
+}
+
+.section-title::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: linear-gradient(90deg, var(--silver), transparent);
+  transition: width 0.6s ease;
+}
+.archive-section:hover .section-title::after { width: 100%; }
+
+.section-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(150,150,200,0.3), transparent);
+}
+
+.subsection-title {
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  color: var(--silver-bright);
+  letter-spacing: 0.05em;
+  font-weight: 500;
+  margin: 2rem 0 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.subsection-title::before {
+  content: '◈';
+  color: var(--silver-dim);
+  font-size: 0.8rem;
+}
+
+.subsection-title-minor {
+  font-family: var(--font-heading);
+  font-size: 0.85rem;
+  color: var(--silver);
+  letter-spacing: 0.08em;
+  font-weight: 500;
+  margin: 1.5rem 0 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.subsection-title-minor::before {
+  content: '⤷';
+  color: var(--silver-dim);
+  font-size: 0.8rem;
+}
+
+p {
+  font-family: var(--font-body);
+  font-size: 1.05rem;
+  color: var(--silver-bright);
+  line-height: 1.8;
+  margin-bottom: 1.2rem;
+}
+
+.quote-block {
+  margin: 2.5rem 0;
+  padding: 1.5rem 2rem;
+  border-left: 2px solid rgba(200,200,255,0.25);
+  background: rgba(200,200,255,0.03);
+  position: relative;
+}
+
+.quote-block::before {
+  content: '"';
+  position: absolute;
+  top: -0.5rem;
+  left: 1.5rem;
+  font-family: var(--font-display);
+  font-size: 3rem;
+  color: rgba(200,200,255,0.15);
+  line-height: 1;
+}
+
+.quote-block p {
+  font-style: italic;
+  color: var(--silver-pure);
+  font-size: 1.05rem;
+  margin: 0 0 0.5rem;
+}
+
+.quote-attribution {
+  font-family: var(--font-heading);
+  font-size: 0.75rem;
+  color: var(--silver-dim);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+/* List styling */
+.lore-list {
+  list-style: none;
+  margin: 1rem 0 1.5rem;
+  padding: 0;
+}
+
+.lore-list li {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: var(--silver-bright);
+  padding: 0.4rem 0 0.4rem 2rem;
+  position: relative;
+  line-height: 1.6;
+}
+
+.lore-list li::before {
+  content: '☽';
+  position: absolute;
+  left: 0;
+  color: var(--silver-dim);
+  font-size: 0.7rem;
+  top: 0.6rem;
+}
+
+/* Tenet / special blocks */
+.tenet-block {
+  background: rgba(10,10,25,0.8);
+  border: 1px solid rgba(150,150,200,0.1);
+  padding: 1.5rem 2rem;
+  margin: 1rem 0;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.tenet-block:hover {
+  border-color: rgba(200,200,255,0.25);
+  background: rgba(15,15,35,0.9);
+  transform: translateX(4px);
+}
+
+.tenet-block::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(to bottom, transparent, rgba(200,200,255,0.5), transparent);
+}
+
+.tenet-label {
+  font-family: var(--font-heading);
+  font-size: 0.7rem;
+  color: var(--silver-dim);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  margin-bottom: 0.4rem;
+}
+
+.tenet-text {
+  font-family: var(--font-body);
+  font-style: italic;
+  color: var(--silver-pure);
+  font-size: 1.05rem;
+  margin: 0;
+}
+
+/* Spell block */
+.spell-block {
+  background: linear-gradient(135deg, rgba(8,8,20,0.95), rgba(12,12,28,0.9));
+  border: 1px solid rgba(150,150,200,0.12);
+  padding: 1.8rem 2rem;
+  margin: 1.5rem 0;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s ease;
+  cursor: default;
+}
+
+.spell-block::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at top left, rgba(150,150,220,0.05), transparent 60%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.spell-block:hover {
+  border-color: rgba(200,200,255,0.3);
+  box-shadow: 0 0 30px rgba(100,100,180,0.1);
+  transform: translateY(-2px);
+}
+.spell-block:hover::after { opacity: 1; }
+
+.spell-name {
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  color: var(--silver-glow);
+  letter-spacing: 0.08em;
+  margin-bottom: 0.8rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.spell-name::before {
+  content: '✦';
+  color: var(--silver-dim);
+  font-size: 0.7rem;
+  animation: spellStar 2s ease-in-out infinite;
+}
+
+@keyframes spellStar {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; color: var(--silver-bright); }
+}
+
+.spell-block:hover .spell-name::before {
+  animation: spellStarHover 0.5s ease-in-out infinite;
+}
+
+@keyframes spellStarHover {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.3); color: var(--silver-glow); }
+}
+
+.spell-tag {
+  font-family: var(--font-heading);
+  font-size: 0.6rem;
+  color: var(--silver-dim);
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  background: rgba(150,150,200,0.08);
+  padding: 0.2rem 0.6rem;
+  border: 1px solid rgba(150,150,200,0.12);
+  margin-left: auto;
+}
+
+.spell-desc {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  color: var(--silver);
+  line-height: 1.7;
+  margin: 0;
+}
+
+/* Warning block */
+.warning-block {
+  background: rgba(20,8,8,0.9);
+  border: 1px solid rgba(150,50,50,0.3);
+  padding: 1.5rem 2rem;
+  margin: 2rem 0;
+  position: relative;
+}
+
+.warning-block::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(to bottom, transparent, rgba(200,80,80,0.6), transparent);
+}
+
+.warning-block p { color: rgba(200,150,150,0.9); }
+
+/* Forbidden block */
+.forbidden-block {
+  background: rgba(8,5,8,0.95);
+  border: 1px solid rgba(100,50,100,0.3);
+  padding: 2rem;
+  margin: 2rem 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.forbidden-block::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, rgba(80,0,80,0.1), transparent 70%);
+  animation: forbiddenPulse 3s ease-in-out infinite;
+}
+
+@keyframes forbiddenPulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+.redacted {
+  background: rgba(100,100,100,0.8);
+  color: transparent;
+  padding: 0 0.3rem;
+  display: inline-block;
+  position: relative;
+  user-select: none;
+}
+
+/* Security corps block */
+.corps-block {
+  background: linear-gradient(135deg, rgba(8,10,20,0.95), rgba(12,14,28,0.9));
+  border: 1px solid rgba(150,150,200,0.1);
+  padding: 2rem;
+  margin: 1.5rem 0;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s ease;
+}
+
+.corps-block::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(200,200,255,0.3), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.6s ease;
+}
+
+.corps-block:hover::before { transform: translateX(0); }
+
+.corps-title {
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  color: var(--silver-pure);
+  letter-spacing: 0.08em;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-weight: 600;
+}
+
+.corps-mandate {
+  font-family: var(--font-body);
+  font-style: italic;
+  font-size: 0.9rem;
+  color: var(--silver-mid);
+  margin-bottom: 1rem;
+  padding: 0.8rem 1rem;
+  background: rgba(200,200,255,0.03);
+  border-left: 1px solid rgba(200,200,255,0.15);
+}
+
+/* Hierarchy rank block */
+.rank-item {
+  display: flex;
+  gap: 1.5rem;
+  padding: 0.8rem 0;
+  border-bottom: 1px solid rgba(150,150,200,0.06);
+  align-items: flex-start;
+  transition: all 0.3s ease;
+}
+.rank-item:hover { background: rgba(200,200,255,0.02); padding-left: 0.5rem; }
+
+.rank-name {
+  font-family: var(--font-heading);
+  font-size: 0.8rem;
+  color: var(--silver-bright);
+  letter-spacing: 0.08em;
+  min-width: 180px;
+  padding-top: 0.1rem;
+}
+
+.rank-desc {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  color: var(--silver-mid);
+  line-height: 1.5;
+}
+
+/* Lore tag badge */
+.lore-badge {
+  display: inline-block;
+  font-family: var(--font-heading);
+  font-size: 0.6rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.6rem;
+  border: 1px solid;
+  margin: 0.2rem;
+}
+.badge-frost { color: var(--frost); border-color: rgba(168,216,240,0.3); }
+.badge-cosmic { color: var(--cosmic); border-color: rgba(136,136,204,0.3); }
+.badge-silverblade { color: var(--silver-pure); border-color: rgba(200,200,240,0.3); }
+.badge-night { color: rgba(100,120,180,0.9); border-color: rgba(100,120,180,0.3); }
+.badge-selenurgy { color: var(--gold-moon); border-color: rgba(200,184,112,0.3); }
+.badge-forbidden { color: rgba(180,80,80,0.9); border-color: rgba(150,50,50,0.3); }
+
+/* Moon phase display */
+.phase-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.phase-item {
+  background: rgba(10,10,22,0.8);
+  border: 1px solid rgba(150,150,200,0.1);
+  padding: 1.2rem;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.phase-item:hover {
+  border-color: rgba(200,200,255,0.3);
+  background: rgba(15,15,35,0.9);
+  transform: translateY(-3px);
+}
+
+.phase-symbol {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  filter: drop-shadow(0 0 6px rgba(200,200,255,0.5));
+}
+
+.phase-name {
+  font-family: var(--font-heading);
+  font-size: 0.7rem;
+  color: var(--silver-bright);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+.phase-effect {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  color: var(--silver-mid);
+  line-height: 1.4;
+  font-style: italic;
+}
+
+/* Hierarchy tree */
+.hierarchy-tree {
+  border-left: 1px solid rgba(150,150,200,0.15);
+  padding-left: 1.5rem;
+  margin: 1rem 0;
+}
+
+.hierarchy-node {
+  padding: 0.6rem 0;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.hierarchy-node::before {
+  content: '';
+  position: absolute;
+  left: -1.5rem;
+  top: 1rem;
+  width: 1rem;
+  height: 1px;
+  background: rgba(150,150,200,0.3);
+}
+
+.hierarchy-node-title {
+  font-family: var(--font-heading);
+  font-size: 0.8rem;
+  color: var(--silver-bright);
+  letter-spacing: 0.08em;
+  margin-bottom: 0.2rem;
+}
+
+.hierarchy-node-desc {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  color: var(--silver-mid);
+  line-height: 1.5;
+}
+
+/* Moon divider */
+.moon-divider {
+  text-align: center;
+  margin: 3rem 0;
+  position: relative;
+  color: var(--silver-dim);
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  letter-spacing: 2rem;
+}
+
+.moon-divider::before,
+.moon-divider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 35%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(150,150,200,0.3));
+}
+.moon-divider::before { left: 0; }
+.moon-divider::after { right: 0; background: linear-gradient(270deg, transparent, rgba(150,150,200,0.3)); }
+
+/* Particle effect area */
+.particle-zone {
+  position: relative;
+}
+
+/* ═══════════════════════════════════════════════════
+   FLOATING PARTICLES
+═══════════════════════════════════════════════════ */
+.particle {
+  position: fixed;
+  pointer-events: none;
+  z-index: 1;
+  border-radius: 50%;
+  animation: particleDrift linear infinite;
+  opacity: 0;
+}
+
+@keyframes particleDrift {
+  0% { transform: translateY(100vh) translateX(0) rotate(0deg); opacity: 0; }
+  10% { opacity: 0.6; }
+  90% { opacity: 0.3; }
+  100% { transform: translateY(-20px) translateX(var(--drift, 30px)) rotate(360deg); opacity: 0; }
+}
+
+/* ═══════════════════════════════════════════════════
+   MISC UTILITIES
+═══════════════════════════════════════════════════ */
+.text-silver { color: var(--silver-pure); }
+.text-dim { color: var(--silver-dim); }
+.text-italic { font-style: italic; }
+.mt-2 { margin-top: 2rem; }
+
+.glyph-separator {
+  text-align: center;
+  font-family: var(--font-heading);
+  color: var(--silver-dim);
+  font-size: 1rem;
+  margin: 2rem 0;
+  letter-spacing: 1.5rem;
+  opacity: 0.5;
+}
+
+/* Scroll indicator */
+.scroll-indicator {
+  position: fixed;
+  top: 0;
+  left: 280px;
+  right: 0;
+  height: 2px;
+  background: rgba(200,200,255,0.05);
+  z-index: 50;
+}
+
+.scroll-progress {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--silver-dim), var(--silver-pure));
+  box-shadow: 0 0 8px rgba(200,200,255,0.4);
+  transition: width 0.1s linear;
+}
+
+/* ═══════════════════════════════════════════════════
+   RIPPLE EFFECT
+═══════════════════════════════════════════════════ */
+.ripple-container {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(200,200,255,0.4);
+  animation: rippleOut 0.8s ease-out forwards;
+  transform: translate(-50%, -50%);
+}
+
+@keyframes rippleOut {
+  0% { width: 0; height: 0; opacity: 0.6; }
+  100% { width: 100px; height: 100px; opacity: 0; }
+}
+
+/* ═══════════════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .archive-nav { width: 220px; min-width: 220px; }
+  .archive-content { padding: 2rem 1.5rem; }
+  .scroll-indicator { left: 220px; }
+  .categories-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 600px) {
+  #page-archive { flex-direction: column; }
+  .archive-nav { width: 100%; height: auto; position: relative; min-width: unset; }
+  .scroll-indicator { left: 0; }
+}
+
+/* ═══════════════════════════════════════════════════
+   LYRIC BLOCK (Carmen Velatum)
+═══════════════════════════════════════════════════ */
+.lyric-block {
+  background: rgba(8,8,18,0.9);
+  border: 1px solid rgba(150,150,200,0.12);
+  padding: 2rem 2.5rem;
+  margin: 1.5rem 0;
+  position: relative;
+  overflow: hidden;
+  font-family: var(--font-body);
+  font-style: italic;
+}
+
+.lyric-block::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at top, rgba(150,150,220,0.04), transparent 60%);
+}
+
+.lyric-label {
+  font-family: var(--font-heading);
+  font-size: 0.65rem;
+  color: var(--silver-dim);
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.lyric-label::before { content: '♪'; font-style: normal; }
+
+.lyric-line {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  padding: 0.3rem 0;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--silver);
+  border-bottom: 1px solid rgba(150,150,200,0.05);
+  transition: background 0.3s ease;
+}
+.lyric-line:hover { background: rgba(200,200,255,0.02); }
+
+.lyric-latin { color: var(--silver-bright); }
+.lyric-translation { color: var(--silver-mid); font-size: 0.88rem; }
+
+/* ═══════════════════════════════════════════════════
+   TOOLTIP
+═══════════════════════════════════════════════════ */
+.has-tooltip {
+  position: relative;
+  border-bottom: 1px dotted rgba(200,200,255,0.3);
+  cursor: help;
+}
+
+.tooltip-text {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(10,10,25,0.98);
+  border: 1px solid rgba(150,150,200,0.25);
+  padding: 0.5rem 0.8rem;
+  font-family: var(--font-heading);
+  font-size: 0.7rem;
+  color: var(--silver-bright);
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  letter-spacing: 0.05em;
+  z-index: 100;
+}
+
+.has-tooltip:hover .tooltip-text { opacity: 1; }
+
+/* ═══════════════════════════════════════════════════
+   ANIMATED MOON PHASES IN NAV
+═══════════════════════════════════════════════════ */
+.nav-moon {
+  text-align: center;
+  padding: 1.5rem;
+  border-top: 1px solid rgba(150,150,200,0.1);
+  margin-top: auto;
+}
+
+.nav-moon-icon {
+  font-size: 1.5rem;
+  animation: navMoonGlow 4s ease-in-out infinite;
+}
+
+@keyframes navMoonGlow {
+  0%, 100% { filter: drop-shadow(0 0 3px rgba(200,200,255,0.3)); opacity: 0.6; }
+  50% { filter: drop-shadow(0 0 10px rgba(200,200,255,0.8)); opacity: 1; }
+}
+
+/* Content load animation */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-in {
+  animation: fadeInUp 0.6s ease forwards;
+}
+
+/* Glowing text highlight */
+.highlight {
+  color: var(--silver-pure);
+  text-shadow: 0 0 8px rgba(200,200,255,0.4);
+}
+
+.highlight-gold {
+  color: var(--gold-moon);
+  text-shadow: 0 0 8px rgba(200,184,112,0.3);
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════
+     STAR FIELD
+══════════════════════════════════ -->
+<div class="starfield" id="starfield"></div>
+
+<!-- ══════════════════════════════════
+     PARTICLES
+══════════════════════════════════ -->
+<div class="ripple-container" id="rippleContainer"></div>
+
+<!-- ══════════════════════════════════
+     LOADING SCREEN
+══════════════════════════════════ -->
+<div class="page" id="page-loading">
+  <div style="display:flex;flex-direction:column;align-items:center;gap:1.5rem;position:relative;z-index:2;">
+    <!-- Moon emblem -->
+    <div class="loading-moon">
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" width="100" height="100">
+        <circle cx="50" cy="50" r="35" fill="none" stroke="rgba(200,200,255,0.08)" stroke-width="1"/>
+        <circle cx="50" cy="50" r="28" fill="none" stroke="rgba(200,200,255,0.12)" stroke-width="1"/>
+        <!-- crescent -->
+        <path d="M50,18 A32,32 0 1,0 50,82 A22,22 0 1,1 50,18Z" fill="rgba(200,200,255,0.15)"/>
+        <path d="M50,18 A32,32 0 1,0 50,82 A22,22 0 1,1 50,18Z" fill="none" stroke="rgba(200,200,255,0.4)" stroke-width="0.8"/>
+        <!-- glyphs around the moon -->
+        <g fill="rgba(200,200,255,0.3)" font-family="serif" font-size="8">
+          <text x="47" y="10" text-anchor="middle">✦</text>
+          <text x="47" y="95" text-anchor="middle">✦</text>
+          <text x="5" y="53" text-anchor="middle">✦</text>
+          <text x="90" y="53" text-anchor="middle">✦</text>
+        </g>
+        <!-- Filigree lines -->
+        <line x1="50" y1="5" x2="50" y2="15" stroke="rgba(200,200,255,0.25)" stroke-width="0.8"/>
+        <line x1="50" y1="85" x2="50" y2="95" stroke="rgba(200,200,255,0.25)" stroke-width="0.8"/>
+        <line x1="5" y1="50" x2="15" y2="50" stroke="rgba(200,200,255,0.25)" stroke-width="0.8"/>
+        <line x1="85" y1="50" x2="95" y2="50" stroke="rgba(200,200,255,0.25)" stroke-width="0.8"/>
+      </svg>
+      <div class="loading-ring"></div>
+      <div class="loading-ring"></div>
+      <div class="loading-ring"></div>
+    </div>
+
+    <!-- Title -->
+    <div class="loading-title">Authenticating Access...</div>
+
+    <!-- Subtitle cycling -->
+    <div class="loading-subtitle">
+      <span class="loading-sub-text" id="sub0">Authenticating Gnostic Stone...</span>
+      <span class="loading-sub-text" id="sub1">Resonating with the Subastral Matrix...</span>
+      <span class="loading-sub-text" id="sub2">Calibrating Lunar Phase Resonance...</span>
+      <span class="loading-sub-text" id="sub3">Attuning to the Veil's Frequency...</span>
+      <span class="loading-sub-text" id="sub4">Verifying Metyrian Sigil Binding...</span>
+      <span class="loading-sub-text" id="sub5">Cross-referencing the Seven Locks...</span>
+      <span class="loading-sub-text" id="sub6">Access Granted — Ateleia Witnesses</span>
+    </div>
+
+    <!-- Progress bar -->
+    <div class="loading-bar-container">
+      <div class="loading-bar" id="loadingBar"></div>
+    </div>
+
+    <!-- Rune symbols -->
+    <div class="loading-runes">
+      <span class="rune-symbol">☽</span>
+      <span class="rune-symbol">✦</span>
+      <span class="rune-symbol">◈</span>
+      <span class="rune-symbol">✦</span>
+      <span class="rune-symbol">☾</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     HOME PAGE
+══════════════════════════════════ -->
+<div class="page hidden" id="page-home">
+  <!-- Decorative filigree background -->
+  <svg style="position:fixed;inset:0;width:100%;height:100%;pointer-events:none;opacity:0.04;z-index:1;" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+    <defs>
+      <pattern id="filigreePattern" x="0" y="0" width="200" height="200" patternUnits="userSpaceOnUse">
+        <circle cx="100" cy="100" r="80" fill="none" stroke="silver" stroke-width="0.5"/>
+        <circle cx="100" cy="100" r="60" fill="none" stroke="silver" stroke-width="0.3"/>
+        <line x1="100" y1="20" x2="100" y2="180" stroke="silver" stroke-width="0.3"/>
+        <line x1="20" y1="100" x2="180" y2="100" stroke="silver" stroke-width="0.3"/>
+        <line x1="43" y1="43" x2="157" y2="157" stroke="silver" stroke-width="0.2"/>
+        <line x1="157" y1="43" x2="43" y2="157" stroke="silver" stroke-width="0.2"/>
+        <circle cx="100" cy="100" r="5" fill="none" stroke="silver" stroke-width="0.5"/>
+      </pattern>
+    </defs>
+    <rect width="100%" height="100%" fill="url(#filigreePattern)"/>
+  </svg>
+
+  <div style="position:relative;z-index:2;width:100%;max-width:1200px;padding:0 2rem;">
+    <!-- Header -->
+    <div class="home-header">
+      <!-- Large decorative moon -->
+      <div class="home-moon-emblem">
+        <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="40" cy="40" r="30" fill="none" stroke="rgba(200,200,255,0.15)" stroke-width="1"/>
+          <circle cx="40" cy="40" r="22" fill="none" stroke="rgba(200,200,255,0.2)" stroke-width="0.8"/>
+          <path d="M40,12 A28,28 0 1,0 40,68 A19,19 0 1,1 40,12Z" fill="rgba(200,200,255,0.18)" stroke="rgba(200,200,255,0.5)" stroke-width="0.8"/>
+          <circle cx="40" cy="40" r="3" fill="rgba(200,200,255,0.4)"/>
+          <!-- outer glyphs -->
+          <text x="38" y="6" font-size="5" fill="rgba(200,200,255,0.5)" text-anchor="middle">✦</text>
+          <text x="38" y="78" font-size="5" fill="rgba(200,200,255,0.5)" text-anchor="middle">✦</text>
+          <text x="3" y="42" font-size="5" fill="rgba(200,200,255,0.5)" text-anchor="middle">✦</text>
+          <text x="73" y="42" font-size="5" fill="rgba(200,200,255,0.5)" text-anchor="middle">✦</text>
+          <!-- outer ring lines -->
+          <line x1="40" y1="2" x2="40" y2="10" stroke="rgba(200,200,255,0.3)" stroke-width="0.8"/>
+          <line x1="40" y1="70" x2="40" y2="78" stroke="rgba(200,200,255,0.3)" stroke-width="0.8"/>
+          <line x1="2" y1="40" x2="10" y2="40" stroke="rgba(200,200,255,0.3)" stroke-width="0.8"/>
+          <line x1="70" y1="40" x2="78" y2="40" stroke="rgba(200,200,255,0.3)" stroke-width="0.8"/>
+        </svg>
+      </div>
+
+      <div class="home-title">Athenaeum of the Veil</div>
+      <div style="font-family:var(--font-heading);font-size:0.8rem;color:var(--silver-dim);letter-spacing:0.5em;margin-bottom:0.8rem;">ARCHIVE OF THE METYRIAN ORDER</div>
+
+      <!-- Filigree divider -->
+      <svg viewBox="0 0 600 20" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:500px;height:20px;opacity:0.4;margin:0 auto 1rem;display:block;">
+        <line x1="0" y1="10" x2="240" y2="10" stroke="rgba(200,200,255,0.4)" stroke-width="0.8"/>
+        <circle cx="260" cy="10" r="3" fill="none" stroke="rgba(200,200,255,0.6)" stroke-width="0.8"/>
+        <circle cx="260" cy="10" r="6" fill="none" stroke="rgba(200,200,255,0.3)" stroke-width="0.5"/>
+        <text x="260" y="14" text-anchor="middle" font-size="7" fill="rgba(200,200,255,0.6)">☽</text>
+        <line x1="280" y1="10" x2="600" y2="10" stroke="rgba(200,200,255,0.4)" stroke-width="0.8"/>
+        <circle cx="120" cy="10" r="2" fill="rgba(200,200,255,0.3)"/>
+        <circle cx="480" cy="10" r="2" fill="rgba(200,200,255,0.3)"/>
+      </svg>
+
+      <p class="home-epigraph">"If the world will not grant us a dawn, then let us shape a tomorrow that answers to no sun."<br><span style="font-family:var(--font-heading);font-size:0.7rem;letter-spacing:0.25em;color:var(--silver-dim);font-style:normal;">— ISOLDE METYR</span></p>
+    </div>
+
+    <!-- Category grid -->
+    <div class="categories-grid" id="categoriesGrid">
+    </div>
+
+    <!-- Footer glyph -->
+    <div style="text-align:center;margin-top:3rem;font-family:var(--font-heading);font-size:0.65rem;color:var(--silver-dim);letter-spacing:0.4em;opacity:0.5;">
+      ── ORDEM ET CONCORDIA ──
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     ARCHIVE PAGE
+══════════════════════════════════ -->
+<div class="page hidden" id="page-archive">
+  <div class="scroll-indicator">
+    <div class="scroll-progress" id="scrollProgress"></div>
+  </div>
+
+  <nav class="archive-nav" id="archiveNav">
+    <div class="nav-header">
+      <div class="nav-back-btn" id="navBackBtn">Return to Archive</div>
+      <div class="nav-archive-title" id="navTitle">—</div>
+    </div>
+    <div id="navItems"></div>
+    <div class="nav-moon">
+      <div class="nav-moon-icon">☽</div>
+    </div>
+  </nav>
+
+  <main class="archive-content" id="archiveMain">
+    <!-- Content injected by JS -->
+  </main>
+</div>
+
+<!-- ══════════════════════════════════
+     INLINE FILIGREE SVG DEFS
+══════════════════════════════════ -->
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <symbol id="corner-filigree" viewBox="0 0 80 80">
+      <path d="M2,2 L2,30 Q2,2 30,2 Z" fill="none" stroke="currentColor" stroke-width="1"/>
+      <path d="M2,2 L2,20 Q2,2 20,2" fill="none" stroke="currentColor" stroke-width="0.5"/>
+      <circle cx="2" cy="2" r="2.5" fill="currentColor"/>
+      <path d="M8,2 Q2,2 2,8" fill="none" stroke="currentColor" stroke-width="0.8"/>
+      <circle cx="12" cy="2" r="1" fill="currentColor" opacity="0.5"/>
+      <circle cx="2" cy="12" r="1" fill="currentColor" opacity="0.5"/>
+      <path d="M20,2 Q2,2 2,20" fill="none" stroke="currentColor" stroke-width="0.4" opacity="0.4"/>
+    </symbol>
+  </defs>
+</svg>
+
+<script>
+/* ═══════════════════════════════════════════════════
+   UTILITY FUNCTIONS
+═══════════════════════════════════════════════════ */
+const $ = id => document.getElementById(id);
+const mk = (tag, cls='', html='') => {
+  const el = document.createElement(tag);
+  if (cls) el.className = cls;
+  if (html) el.innerHTML = html;
+  return el;
+};
+
+/* ═══════════════════════════════════════════════════
+   STAR FIELD
+═══════════════════════════════════════════════════ */
+function createStarField() {
+  const sf = $('starfield');
+  for (let i = 0; i < 180; i++) {
+    const star = document.createElement('div');
+    star.className = 'star';
+    const size = Math.random() * 2.5 + 0.5;
+    star.style.cssText = `
+      width:${size}px; height:${size}px;
+      left:${Math.random()*100}%;
+      top:${Math.random()*100}%;
+      --dur:${2+Math.random()*4}s;
+      --delay:${Math.random()*4}s;
+      --base-opacity:${0.1+Math.random()*0.5};
+    `;
+    sf.appendChild(star);
+  }
+}
+createStarField();
+
+/* ═══════════════════════════════════════════════════
+   RIPPLE ON CLICK
+═══════════════════════════════════════════════════ */
+document.addEventListener('click', e => {
+  const rc = $('rippleContainer');
+  const r = document.createElement('div');
+  r.className = 'ripple';
+  r.style.left = e.clientX + 'px';
+  r.style.top = e.clientY + 'px';
+  rc.appendChild(r);
+  setTimeout(() => r.remove(), 900);
+});
+
+/* ═══════════════════════════════════════════════════
+   FLOATING PARTICLES
+═══════════════════════════════════════════════════ */
+function spawnParticle() {
+  const p = document.createElement('div');
+  p.className = 'particle';
+  const size = Math.random() * 3 + 1;
+  const dur = 6 + Math.random() * 10;
+  const drift = (Math.random() - 0.5) * 100;
+  p.style.cssText = `
+    width:${size}px; height:${size}px;
+    left:${Math.random()*100}%;
+    bottom:-10px;
+    background:rgba(200,200,255,${0.2+Math.random()*0.4});
+    --drift:${drift}px;
+    animation-duration:${dur}s;
+    animation-delay:${Math.random()*5}s;
+    box-shadow:0 0 ${size*2}px rgba(200,200,255,0.5);
+  `;
+  document.body.appendChild(p);
+  setTimeout(() => p.remove(), (dur + 5) * 1000);
+}
+setInterval(spawnParticle, 1200);
+
+/* ═══════════════════════════════════════════════════
+   PAGE TRANSITIONS
+═══════════════════════════════════════════════════ */
+function showPage(id) {
+  ['page-loading','page-home','page-archive'].forEach(pid => {
+    const p = $(pid);
+    if (!p) return;
+    if (pid === id) {
+      p.classList.remove('hidden','gone');
+      setTimeout(() => {
+        if (pid === 'page-archive' || pid === 'page-home') {
+          p.style.overflowY = 'auto';
+        }
+      }, 50);
+    } else {
+      p.classList.add('hidden');
+      setTimeout(() => {
+        if (pid !== 'page-loading') p.style.overflowY = 'hidden';
+      }, 800);
+    }
+  });
+}
+
+/* ═══════════════════════════════════════════════════
+   LOADING SEQUENCE
+═══════════════════════════════════════════════════ */
+const subtexts = ['sub0','sub1','sub2','sub3','sub4','sub5','sub6'];
+let currentSub = 0;
+
+function cycleSubtext() {
+  subtexts.forEach(id => { const el = $(id); if(el) el.classList.remove('active'); });
+  const el = $(subtexts[currentSub]);
+  if (el) el.classList.add('active');
+  currentSub = (currentSub + 1) % subtexts.length;
+}
+
+cycleSubtext();
+const subInterval = setInterval(cycleSubtext, 700);
+
+setTimeout(() => {
+  const bar = $('loadingBar');
+  if (bar) bar.style.width = '100%';
+}, 50);
+
+setTimeout(() => {
+  clearInterval(subInterval);
+  const lastSub = $(subtexts[subtexts.length - 1]);
+  if (lastSub) {
+    subtexts.forEach(id => { const el = $(id); if(el) el.classList.remove('active'); });
+    lastSub.classList.add('active');
+  }
+}, 4800);
+
+setTimeout(() => {
+  showPage('page-home');
+  initHome();
+}, 5500);
+
+/* ═══════════════════════════════════════════════════
+   CATEGORY DATA
+═══════════════════════════════════════════════════ */
+const categories = [
+  {
+    id: 'metyrians',
+    number: 'I',
+    title: 'The Metyrian Order',
+    desc: 'History, culture, philosophy, customs and traditions of the lunar sorcerers',
+    icon: `<svg viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg"><circle cx="25" cy="25" r="18" fill="none" stroke="rgba(200,200,255,0.6)" stroke-width="1"/><path d="M25,8 A17,17 0 1,0 25,42 A12,12 0 1,1 25,8Z" fill="rgba(200,200,255,0.15)" stroke="rgba(200,200,255,0.5)" stroke-width="0.8"/><line x1="25" y1="2" x2="25" y2="8" stroke="rgba(200,200,255,0.4)" stroke-width="1"/><line x1="25" y1="42" x2="25" y2="48" stroke="rgba(200,200,255,0.4)" stroke-width="1"/></svg>`,
+    entries: '7 sections'
+  },
+  {
+    id: 'athenaeum',
+    number: 'II',
+    title: 'The Athenaeum of the Veil',
+    desc: 'Architecture, layout, defenses and structures of the great academy',
+    icon: `<svg viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg"><polygon points="25,5 45,40 5,40" fill="none" stroke="rgba(200,200,255,0.5)" stroke-width="1"/><line x1="25" y1="5" x2="25" y2="40" stroke="rgba(200,200,255,0.3)" stroke-width="0.8"/><line x1="5" y1="40" x2="45" y2="40" stroke="rgba(200,200,255,0.5)" stroke-width="1"/><circle cx="25" cy="20" r="4" fill="none" stroke="rgba(200,200,255,0.6)" stroke-width="0.8"/><line x1="5" y1="43" x2="45" y2="43" stroke="rgba(200,200,255,0.3)" stroke-width="0.8"/></svg>`,
+    entries: '5 sections'
+  },
+  {
+    id: 'lunar-sorcery',
+    number: 'III',
+    title: 'Lunar Sorcery',
+    desc: 'Origins, doctrine, disciplines, notable spells and the ultimate arts of the moon',
+    icon: `<svg viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg"><circle cx="25" cy="25" r="15" fill="none" stroke="rgba(200,200,255,0.4)" stroke-width="0.8"/><path d="M25,10 A15,15 0 1,0 25,40 A10,10 0 1,1 25,10Z" fill="rgba(200,200,255,0.12)" stroke="rgba(200,200,255,0.6)" stroke-width="1"/><circle cx="25" cy="25" r="2" fill="rgba(200,200,255,0.5)"/><line x1="25" y1="2" x2="25" y2="10" stroke="rgba(200,200,255,0.3)" stroke-width="0.8"/><line x1="25" y1="40" x2="25" y2="48" stroke="rgba(200,200,255,0.3)" stroke-width="0.8"/><line x1="2" y1="25" x2="10" y2="25" stroke="rgba(200,200,255,0.3)" stroke-width="0.8"/><line x1="40" y1="25" x2="48" y2="25" stroke="rgba(200,200,255,0.3)" stroke-width="0.8"/><text x="25" y="8" text-anchor="middle" font-size="4" fill="rgba(200,200,255,0.5)">✦</text></svg>`,
+    entries: '6 sections'
+  },
+  {
+    id: 'security',
+    number: 'IV',
+    title: 'The Security Corps',
+    desc: 'Mandates, hierarchies and doctrines of the four martial orders of the Athenaeum',
+    icon: `<svg viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg"><path d="M25,5 L45,15 L45,30 Q45,45 25,48 Q5,45 5,30 L5,15 Z" fill="none" stroke="rgba(200,200,255,0.5)" stroke-width="1"/><path d="M25,12 L38,19 L38,30 Q38,40 25,43 Q12,40 12,30 L12,19 Z" fill="rgba(200,200,255,0.07)" stroke="rgba(200,200,255,0.3)" stroke-width="0.8"/><circle cx="25" cy="28" r="5" fill="none" stroke="rgba(200,200,255,0.5)" stroke-width="0.8"/></svg>`,
+    entries: '4 sections'
+  },
+  {
+    id: 'figures',
+    number: 'V',
+    title: 'Notable Figures',
+    desc: 'Biographies of Isolde Metyr, First Archmagus, and her son Lev, the Silverlight Sage',
+    icon: `<svg viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg"><circle cx="25" cy="18" r="8" fill="none" stroke="rgba(200,200,255,0.5)" stroke-width="1"/><path d="M10,42 Q10,28 25,28 Q40,28 40,42" fill="none" stroke="rgba(200,200,255,0.5)" stroke-width="1"/><circle cx="25" cy="18" r="4" fill="rgba(200,200,255,0.1)"/><line x1="25" y1="10" x2="25" y2="5" stroke="rgba(200,200,255,0.3)" stroke-width="0.8"/><line x1="20" y1="13" x2="17" y2="8" stroke="rgba(200,200,255,0.2)" stroke-width="0.6"/><line x1="30" y1="13" x2="33" y2="8" stroke="rgba(200,200,255,0.2)" stroke-width="0.6"/></svg>`,
+    entries: '2 sections'
+  },
+  {
+    id: 'sacred',
+    number: 'VI',
+    title: 'Sacred & Forbidden',
+    desc: 'The Carmen Velatum, the Silverlight Archipelago, The Choir, the Trilune Trinity, and the Forbidden Arts',
+    icon: `<svg viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg"><polygon points="25,5 30,20 46,20 33,30 38,46 25,37 12,46 17,30 4,20 20,20" fill="none" stroke="rgba(200,200,255,0.5)" stroke-width="1"/><circle cx="25" cy="25" r="8" fill="rgba(200,200,255,0.08)" stroke="rgba(200,200,255,0.4)" stroke-width="0.8"/><circle cx="25" cy="25" r="3" fill="rgba(200,200,255,0.3)"/></svg>`,
+    entries: '5 sections'
+  }
+];
+
+/* ═══════════════════════════════════════════════════
+   INIT HOME
+═══════════════════════════════════════════════════ */
+function initHome() {
+  const grid = $('categoriesGrid');
+  if (!grid) return;
+  grid.innerHTML = '';
+
+  categories.forEach((cat, i) => {
+    const card = document.createElement('div');
+    card.className = 'category-card';
+    card.style.animationDelay = `${i * 0.1}s`;
+    card.innerHTML = `
+      <div class="card-shimmer"></div>
+      <svg class="card-corner tl" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><path d="M2,2 L2,20 Q2,2 20,2 Z" fill="none" stroke="rgba(200,200,255,0.8)" stroke-width="1"/><circle cx="2" cy="2" r="2" fill="rgba(200,200,255,0.8)"/></svg>
+      <svg class="card-corner tr" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><path d="M2,2 L2,20 Q2,2 20,2 Z" fill="none" stroke="rgba(200,200,255,0.8)" stroke-width="1"/><circle cx="2" cy="2" r="2" fill="rgba(200,200,255,0.8)"/></svg>
+      <svg class="card-corner bl" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><path d="M2,2 L2,20 Q2,2 20,2 Z" fill="none" stroke="rgba(200,200,255,0.8)" stroke-width="1"/><circle cx="2" cy="2" r="2" fill="rgba(200,200,255,0.8)"/></svg>
+      <svg class="card-corner br" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><path d="M2,2 L2,20 Q2,2 20,2 Z" fill="none" stroke="rgba(200,200,255,0.8)" stroke-width="1"/><circle cx="2" cy="2" r="2" fill="rgba(200,200,255,0.8)"/></svg>
+      <div class="card-icon">${cat.icon}</div>
+      <div class="card-number">ARCHIVE ${cat.number}</div>
+      <div class="card-title">${cat.title}</div>
+      <div class="card-desc">${cat.desc}</div>
+      <div class="card-entries">${cat.entries}</div>
+    `;
+
+    card.style.opacity = '0';
+    card.style.transform = 'translateY(20px)';
+    card.style.transition = `opacity 0.5s ease ${i*0.08}s, transform 0.5s ease ${i*0.08}s, all 0.4s cubic-bezier(0.25,0.46,0.45,0.94)`;
+
+    setTimeout(() => {
+      card.style.opacity = '1';
+      card.style.transform = 'translateY(0)';
+    }, 100 + i * 80);
+
+    card.addEventListener('click', () => openArchive(cat.id));
+    grid.appendChild(card);
+  });
+}
+
+/* ═══════════════════════════════════════════════════
+   ARCHIVE CONTENT DATA
+═══════════════════════════════════════════════════ */
+const archiveData = {
+
+  /* ─── I: THE METYRIAN ORDER ─── */
+  metyrians: {
+    title: 'The Metyrian Order',
+    subtitle: 'ARCHIVE I — THE PEOPLE OF THE MOON',
+    epigraph: '"Every night we are rewritten by the light we borrow. So too must our doctrines yield and reform."',
+    icon: `<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"><circle cx="30" cy="30" r="22" fill="none" stroke="rgba(200,200,255,0.3)" stroke-width="1"/><path d="M30,10 A20,20 0 1,0 30,50 A14,14 0 1,1 30,10Z" fill="rgba(200,200,255,0.12)" stroke="rgba(200,200,255,0.5)" stroke-width="1"/><line x1="30" y1="2" x2="30" y2="10" stroke="rgba(200,200,255,0.4)" stroke-width="1"/><line x1="30" y1="50" x2="30" y2="58" stroke="rgba(200,200,255,0.4)" stroke-width="1"/></svg>`,
+    sections: [
+      {
+        id: 'origins',
+        title: 'Origins & History',
+        content: `
+          <div class="subsection-title">Birth of Lunar Sorcery</div>
+          <p>Traditions speak of a first understanding that occurred when a people, stranded under a long, cold night, learned to read the Moon's reflections in still water and in the sheen of frost. The "birth" is thus a convergence of observation, survival and inward turning: the moment when reflection was recognized as causally meaningful. Many founding myths conflate event and insight; they are best treated as heuristic rather than literal.</p>
+
+          <div class="subsection-title">Earliest Recorded History</div>
+          <p>The oldest extant records are not great treatises but short operational logs: who performed a tide-smoothing, who kept the harvest safe through a long stormy spring. These records show early Lunar arts as civic technologies — calculated ritual, seasonal observance and communal rites, sometimes traded like craft. Surviving tablets show formulae couched as mnemonic verse rather than symbolic equations: the language of adaptation. The scarceness of early texts explains much of the later aura of secrecy that would come to define the Metyrian character.</p>
+
+          <div class="subsection-title">Early Community Structure</div>
+          <p>Communities formed around pools of reflection: natural caverns, salt-houses, and high moors. Their social structure blended guild-like apprenticing with ritual authority. Elders — often called <span class="has-tooltip">Lunarchs<span class="tooltip-text">Senior ceremonial and administrative leaders of a Cloister</span></span> — combined administrative duties with calibration of rites against lunar cycles. The cloisters functioned as repositories of both technique and social memory.</p>
+          <p>Organizational norms included a strict recording ethic for redundancy, a calendrical liturgy, and rotating watch-rituals to preserve communal health.</p>
+
+          <div class="subsection-title">Centuries under Aetherian Oppression</div>
+          <div class="quote-block">
+            <p>For many centuries the Aetherian orders persecuted lunar arts, associating them with secrecy, subversion, and a model of power that emphasized reflection rather than radiance. Cloisters were razed, libraries burned, and public practice became a capital offence in many provinces.</p>
+          </div>
+          <p>In response, the lunar communities dispersed: rites went private, knowledge was condensed into marginalia and coded songs, and small <em>moon-keepers</em> kept the embers alive. These centuries shaped the culture of concealment that still colours Metyrian Sorcerers to this day — their softness of voice, their comfort in shadow, their distrust of open displays of power.</p>
+
+          <div class="subsection-title">The Reemergence</div>
+          <p>The re-emergence was gradual: edicts relaxed, commissions formed, and a figure emerged to unify the scattered cloisters. Isolde Metyr negotiated with officialdom, codified clandestine rites into open curricula, and established the <span class="highlight">Athenaeum of the Veil</span>. Her enchantment of perpetual night over the Riftlands stands as the most famous demonstration of Lunar Sorcery, cementing the Moon's place in the public imagination.</p>
+        `
+      },
+      {
+        id: 'social-structure',
+        title: 'Social Structure',
+        content: `
+          <p>Though outwardly a miserable existence of survival, it is precisely the crucible of persecution that allowed the Metyrians to foster such a strong community identity. The family unit is a loose term for them — they often formed bonds with so-called Sworn Brothers and Sisters and adopted children left orphaned by raids. The concept of the family unit was left underdeveloped, and perhaps because of that, it has allowed modern Metyrians to grasp the depths of familial bonds outside of blood.</p>
+
+          <div class="subsection-title">Historical Cloister Organization</div>
+          <div class="hierarchy-tree">
+            <div class="hierarchy-node">
+              <div class="hierarchy-node-title">Lunarch / Elder</div>
+              <div class="hierarchy-node-desc">Highest authority — either an Elder whose experience made them natural leader, or a particularly gifted Sorcerer. Took direct action pre-emptively and modified decrees upon Conclave deliberation.</div>
+            </div>
+            <div class="hierarchy-node">
+              <div class="hierarchy-node-title">Astral / Lunar Conclave</div>
+              <div class="hierarchy-node-desc">A rudimentary senate deliberating matters of Cloister security. Advisory rather than executive in ultimate power.</div>
+            </div>
+            <div class="hierarchy-node">
+              <div class="hierarchy-node-title">Warrior-Scholars</div>
+              <div class="hierarchy-node-desc">The knight-class of the Cloister. During peace they studied and taught; when necessity called, they took up arms — harnessing potent spells to defend kin or buy time for escape.</div>
+            </div>
+            <div class="hierarchy-node">
+              <div class="hierarchy-node-title">The Wider Cloister</div>
+              <div class="hierarchy-node-desc">Various classes of citizens: cultivators, child-rearers for orphans, teachers, researchers, craftspeople.</div>
+            </div>
+          </div>
+
+          <div class="subsection-title">Modern Athenaeum Structure</div>
+          <p>With the Metyrians united under the First Archmagus, the social order of old has been expanded. Various Lunarchs now convene in a Conclave, whilst the original Conclaves were relegated to advisory roles. The pre-eminent executive power rests in the hands of the Archmagus and the Grandmasters — the foremost experts of each discipline. This centralization has greatly aided in naturalizing the various Cloisters into the cosmopolitan structure of the Athenaeum.</p>
+
+          <div class="moon-divider">☽</div>
+
+          <div class="subsection-title">The Archmagisterium</div>
+          <p>The Archmagisterium acts as Provost to the Archmagus, with each Magister charged with oversight of a field they are particularly skilled in. They are all <span class="has-tooltip">Plenilunarchs<span class="tooltip-text">Masters who have achieved communion with the Moon — privy to Ateleia's true name</span></span>, the most loyal and most skilled among Metyrians.</p>
+
+          <div class="rank-item"><div class="rank-name">The Archmagister</div><div class="rank-desc">Voted as General-Secretary of the Archmagisterium. Oversees internal operations, resolves conflict, controls procedure and confirms legitimacy of documentation.</div></div>
+          <div class="rank-item"><div class="rank-name">Magister of the Treasury</div><div class="rank-desc">Long-term fiscal strategy, endowments, inter-institutional funding flows, asset valuation and sovereign reserves.</div></div>
+          <div class="rank-item"><div class="rank-name">Magister of Human Resources</div><div class="rank-desc">Interpersonal relations, conflict mediation, individual welfare, performance evaluations, promotions and faculty employment.</div></div>
+          <div class="rank-item"><div class="rank-name">Magister of Admissions</div><div class="rank-desc">External intake, entry trials, examinations, visitor registration, expulsions and permanent banishments.</div></div>
+          <div class="rank-item"><div class="rank-name">Magister of the Codices</div><div class="rank-desc">Libraries, archives, vaults, sealed repositories, doctrinal canonization and epistemic classification.</div></div>
+          <div class="rank-item"><div class="rank-name">Magister of the Conclave</div><div class="rank-desc">Oversees councils, committees and voting bodies. Appoints Deans and Chairs; canonizes disciplines.</div></div>
+          <div class="rank-item"><div class="rank-name">Magister of the Aegis</div><div class="rank-desc">In charge of the Athenaeum's defense across all corps and security arms.</div></div>
+          <div class="rank-item"><div class="rank-name">Magister of Communications</div><div class="rank-desc">Information flow, announcements, external correspondence, diplomacy and narrative management.</div></div>
+          <div class="rank-item"><div class="rank-name">Magister of the Disciplines</div><div class="rank-desc">Creation, accreditation, dissolution and standardization of disciplines and schools of study.</div></div>
+        `
+      },
+      {
+        id: 'moral-philosophy',
+        title: 'Moral Philosophy',
+        content: `
+          <p>Remarkably, all Metyrians follow an extremely similar codex of values despite countless centuries spent isolated from one another. Their view on morality is collectivist and universally shared. As extrapolated from testimonies of former Cloister leaders and frequent proverbs taught to their young:</p>
+
+          <div class="tenet-block">
+            <div class="tenet-label">On Truth</div>
+            <p class="tenet-text">"In the mirror of another's silence, one finds the shape of truth. Therefore, speak only after you have listened twice."</p>
+          </div>
+
+          <div class="tenet-block">
+            <div class="tenet-label">On Power</div>
+            <p class="tenet-text">"Power that cannot be hidden is not worth keeping. Power that cannot be shared is not worth wielding."</p>
+          </div>
+
+          <div class="tenet-block">
+            <div class="tenet-label">On Preservation</div>
+            <p class="tenet-text">"To preserve is not to stagnate; it is to keep the flame low enough to last the night."</p>
+          </div>
+
+          <div class="tenet-block">
+            <div class="tenet-label">On Ritual</div>
+            <p class="tenet-text">"Every rite is a mirror: perform it thoughtlessly, and it will reflect your error."</p>
+          </div>
+
+          <div class="tenet-block">
+            <div class="tenet-label">On Purity</div>
+            <p class="tenet-text">"Purity is not absence of blemish but harmony among them. The Moon's face teaches this to all who dare to look long enough."</p>
+          </div>
+
+          <div class="tenet-block">
+            <div class="tenet-label">On Doctrine</div>
+            <p class="tenet-text">"Every night we are rewritten by the light we borrow. So too must our doctrines yield and reform."</p>
+          </div>
+
+          <div class="tenet-block">
+            <div class="tenet-label">On Ambition</div>
+            <p class="tenet-text">"Beware the temptation to outshine. What you illuminate too brightly, you also blind."</p>
+          </div>
+
+          <div class="tenet-block">
+            <div class="tenet-label">On Character</div>
+            <p class="tenet-text">"If you wish to know the depth of a people, look not at their monuments, but at what they whisper when the lamps are out."</p>
+          </div>
+        `
+      },
+      {
+        id: 'arts-culture',
+        title: 'Arts & Architecture',
+        content: `
+          <p>Metyrian architecture is a work of art in itself. Originally its extent was limited to the subterranean Cloisters they inhabited, but since the legalization of Lunar practices it has blossomed anew.</p>
+
+          <div class="subsection-title">Gothic Origins</div>
+          <p>The style now defined as Gothic originates from Metyrian traditions of commemorating important events upon stone slates. When the slates ran dry, the walls became their canvases and thus gave birth to the bas-relief and relief known today — an integral part of Gothic architecture. It should come as no surprise that the Metyrians possess and proudly flaunt a rich artistic heritage, for iconography, metaphor, and symbolism was the only way they could hope to mask their activities from Aetherian Inquisitors.</p>
+          <p>To them the production of art is as sacrosanct as the study of the Moon; therefore when visiting affiliated structures, one may find themselves overwhelmed by the sheer amount of statues, frescoes, relief, and decor so finely carved it seems lifelike.</p>
+
+          <div class="subsection-title">Cookery</div>
+          <p>Metyrians are renowned for their cuisine. The most common consensus is that their rich culinary culture was developed as a form of mass coping mechanism, rendering life in secrecy just a bit more bearable. Their cuisine is so varied it is impossible to describe collectively, though almost every dish makes ample use of spices — sometimes intricate blends — and entails cooking processes that can take several hours, or even entire days.</p>
+          <p>Outsiders have reported positively on their indulgent and sometimes decadent cuisine, and it has been one of the leading factors in the normalization of relations with the public.</p>
+
+          <div class="subsection-title">Fashion & Wardrobe</div>
+          <p>Metyrian fashion sets itself apart by the sheer variety available. Most opt for classic robes tied at the waist, however many also favor garments resembling Sarees, Chitons, Himations, Abollas, Bishts, Daopaos, Dressing gowns, Chlamyses and Abayas. More recently, many Senior students have begun enjoying tailored outfits in the Aetherian style, later integrated as a full uniform design for last-year students.</p>
+          <p>Catalysts are now treated as an integral part of one's outfit. In origin they were simple and fashioned from wood and moonstone; now many order complex metalworks on commission. It is not uncommon for students to compete playfully to see who has the most sumptuous catalyst, as the manufacturing is free provided the student can supply the materials.</p>
+
+          <div class="subsection-title">Music</div>
+          <p>Metyrian songs are oftentimes sacred in origin, though when rituals shifted from vocal to logical components, they began being used recreationally. Their music is rhythmic, often making use of throat singing, drums, and rustic instruments that give their melodies an almost esoteric lilt.</p>
+          <p>Nowadays the Metyrians flaunt a rich musical history which greatly resembles Druidic and Slavic Hymns, and has in recent years adopted fragments of Aetherian opera and lyrical heritage. Younger generations are re-elaborating old songs in new keys and adding lyrics — oftentimes mocking the ancient Aetherian superstition that likened Metyrians to witches.</p>
+        `
+      },
+      {
+        id: 'tattooing',
+        title: 'Tattooing Traditions',
+        content: `
+          <p>Metyrian customs include a variety of activities, though chief among them would be their tattooing traditions. Many ink their hands — some as a reminder of the Moon's gaze, some because they believe it strengthens their spellwork. Warriors go further, inking their bodies with either tributes to the Moon's plenitude or with scenes from the battles they have won.</p>
+          <p>The practice is ancient, predating even the organized Cloister structures, and remains one of the most visually distinctive marks of a Metyrian practitioner. Among Silverblades in particular, the tradition carries special weight: each scar earned in defense of the Athenaeum may be commemorated in ink, wearing the record of their service openly upon their skin.</p>
+          <div class="quote-block">
+            <p>The tattoo is not vanity. It is testimony. The Moon does not forget those it has marked — nor do we forget what we have survived.</p>
+            <p class="quote-attribution">— attributed to an unnamed Cloister Elder</p>
+          </div>
+        `
+      },
+      {
+        id: 'festivals',
+        title: 'Festivities & Social Life',
+        content: `
+          <p>Most times, Metyrians are a very quiet people — generally soft-spoken and rarely raising their voices when unnecessary. However, during festivities their behavior changes radically, to the point they seem like completely different people: they are loud and outgoing, their voices raised high in a way that to them feels liberating.</p>
+          <p>Ever since the legalization, people have whispered about Metyrian festivals, hearing their group songs and feeling the thrum of their fireside dances even from a distance. Those who joined firsthand out of curiosity have admitted they never felt a thrill such as partaking in entertainment as frenzied and active as theirs.</p>
+
+          <div class="subsection-title">Social Standing Among Students</div>
+          <p>Though not formally ratified, various common denominators can be identified as indicators of student status. Standing is not derived from a single measure, but from the convergence of several traits — observed, inferred, and often exaggerated through rumor, reputation, and spectacle.</p>
+
+          <div class="rank-item"><div class="rank-name">Provenance</div><div class="rank-desc">A student's origin — lineage, patronage, prior tutelage or manner of admission — casts a long shadow. Those believed to be expected by the Athenaeum are afforded instinctive deference.</div></div>
+          <div class="rank-item"><div class="rank-name">Demonstrated Capacity</div><div class="rank-desc">Raw aptitude displayed publicly or under pressure elevates status rapidly. Quiet excellence is respected, as is conspicuous mastery.</div></div>
+          <div class="rank-item"><div class="rank-name">Disciplinary Bias</div><div class="rank-desc">Certain disciplines carry greater social weight — danger, prestige, or utility render their students more "serious" regardless of individual merit.</div></div>
+          <div class="rank-item"><div class="rank-name">Survivability</div><div class="rank-desc">Students who have endured failed trials, dangerous coursework and remain enrolled command a quiet respect. All members of the Security Corps command this respect as a matter of course.</div></div>
+          <div class="rank-item"><div class="rank-name">Festive Fervor</div><div class="rank-desc">During rare festivities, social standing may be won through excess, endurance and spectacle. Those who surrender fully to the night are remembered long after quieter talents are forgotten.</div></div>
+        `
+      },
+      {
+        id: 'amonhorah',
+        title: 'The Great Blasphemer',
+        content: `
+          <div class="quote-block">
+            <p>It is no mystery that the Archmagus was not the first who sought to unify the Cloisters. Many before her attempted, yet none quite succeeded. One of them, however, stands out in both his success and malevolence.</p>
+          </div>
+
+          <p><span class="highlight">Amonhorah, the Great Blasphemer</span>, is remembered to this day as the apotheosis of the corruption of Forbidden Sorceries. His name, once uttered with fear and reverence, is now a cautionary tale for the young.</p>
+          <p>He dabbled in profane rituals that saw as many of his own kin sacrificed as the Meridians he managed to slay with them. His dominion was vast — almost a fourth of all Metyrians obeyed his orders and feared his wrath.</p>
+
+          <div class="subsection-title">His True Objective</div>
+          <div class="forbidden-block">
+            <p>Amonhorah did not seek dominion. He sought <em>annihilation</em>. His profane rituals were but a prelude toward a greater epilogue: <span class="highlight" style="color:rgba(200,100,100,0.9);">The Lament of the Second Twilight</span>. His aim was to call a second Celestial Body into orbit, with the ultimate objective of drowning the entire Continent beneath the tides.</p>
+          </div>
+
+          <div class="subsection-title">His End</div>
+          <p>Fortunately, Amonhorah died as he lived — feared by all around him — so much so that they gathered in conspiracy and saw him slain by his most trusted advisors. Among them was a stranger: Isolde Metyr herself, who had organized the coup in the shadows of his profane halls. She contributed to his death via a piercing wound of her argent staff, impaling his heart and absorbing his power so that it could never again be used to harm another.</p>
+          <p>Amonhorah's legacy has since been systematically dismantled. His efforts for unity among Lunar Sorcerers were reformatted and repurposed by the Archmagus, achieving true unity through concord, rather than dominance through terror.</p>
+          <p style="font-family:var(--font-heading);font-size:0.8rem;color:var(--silver-dim);letter-spacing:0.15em;text-align:center;margin-top:2rem;">And his fate, like that of his profane magic, is to be forgotten.</p>
+        `
+      }
+    ]
+  },
+
+  /* ─── II: THE ATHENAEUM ─── */
+  athenaeum: {
+    title: 'The Athenaeum of the Veil',
+    subtitle: 'ARCHIVE II — PLAN & LAYOUT',
+    epigraph: '"A home at last… one we shall never forsake."',
+    icon: `<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"><polygon points="30,5 54,45 6,45" fill="none" stroke="rgba(200,200,255,0.5)" stroke-width="1"/><line x1="30" y1="5" x2="30" y2="45" stroke="rgba(200,200,255,0.25)" stroke-width="0.8"/><line x1="6" y1="45" x2="54" y2="45" stroke="rgba(200,200,255,0.5)" stroke-width="1"/><line x1="6" y1="49" x2="54" y2="49" stroke="rgba(200,200,255,0.25)" stroke-width="0.8"/><circle cx="30" cy="22" r="5" fill="none" stroke="rgba(200,200,255,0.6)" stroke-width="0.8"/></svg>`,
+    sections: [
+      {
+        id: 'gate',
+        title: 'The Gate of Seven Locks',
+        content: `
+          <p>The <span class="highlight">Gate of Seven Locks</span> is a massive stone portal of moonstone and hammered iron, set at the single landward neck of the peninsula upon which the Athenaeum sits. Tall battlements flank the gate; iconography of phases and lunar glyphs scar the lintel.</p>
+
+          <div class="subsection-title">The Seven Locks</div>
+          <p>Seven distinct tumblers are set into the gate face. Opening each one requires a <em>tri-form authentication</em>:</p>
+          <ul class="lore-list">
+            <li>A physical sigil-key (universal)</li>
+            <li>A power word chanted in sequence (single-use)</li>
+            <li>The correct Gnostic Stone (personal identification)</li>
+          </ul>
+
+          <p>Each Lock corresponds to a facet of the Athenaeum's work:</p>
+          <div class="phase-grid">
+            <div class="phase-item"><div class="phase-symbol">❄</div><div class="phase-name">Lock of Ice</div></div>
+            <div class="phase-item"><div class="phase-symbol">✦</div><div class="phase-name">Lock of Stars</div></div>
+            <div class="phase-item"><div class="phase-symbol">◌</div><div class="phase-name">Lock of Veils</div></div>
+            <div class="phase-item"><div class="phase-symbol">●</div><div class="phase-name">Lock of Night</div></div>
+            <div class="phase-item"><div class="phase-symbol">○</div><div class="phase-name">Lock of Plenilune</div></div>
+            <div class="phase-item"><div class="phase-symbol">◈</div><div class="phase-name">Lock of Silver</div></div>
+            <div class="phase-item"><div class="phase-symbol">♛</div><div class="phase-name">Lock of Sovereignty</div></div>
+          </div>
+
+          <div class="subsection-title">The Gate as Defense</div>
+          <p>When forced, the Gate emits disorienting phases into the Veil that intensify the mist's redirection, and can activate a short-range shockwave strong enough to send someone flying for several dozen meters — whilst causing severe migraines to any enemy within 100 meters.</p>
+        `
+      },
+      {
+        id: 'moonway',
+        title: 'The Moonway',
+        content: `
+          <p>The <span class="highlight">Moonway</span> is a finely carved, broad stone bridge stretching from the Gate to the cliffs upon which the Athenaeum sits. Its length provides a considerable defensive advantage, and its surface is rich with runic frescoes which preserve structural integrity. Without it, the entire complex lies completely isolated from the rest of the world by the sea between it and the mainland.</p>
+
+          <div class="subsection-title">Features & Enchantments</div>
+          <ul class="lore-list">
+            <li><strong>Inset Moonlanterns</strong> — act as charm-dispelling areas that automatically filter the silver mist from the Riftlands and reveal illusions from those crossing.</li>
+            <li><strong>Painted Glass Mosaics</strong> — act as surveillance through the eyes of the figures represented, which are Sending Stones capable of tracking all who cross at what time.</li>
+            <li><strong>Moonstone Obelisks</strong> — act as Waystones for patrols of Custodes.</li>
+          </ul>
+
+          <div class="subsection-title">Defense Systems</div>
+          <ul class="lore-list">
+            <li>Sections contain pressure runes capable of collapsing the bridge if access must be severed.</li>
+            <li>The entire Moonway is lined with small inlaid Moonstones containing pre-cast attack spells, acting as turrets to quickly neutralize potential invaders.</li>
+          </ul>
+
+          <div class="subsection-title">The Barracks Complex</div>
+          <p>Found near the egress point of the Moonway into the Athenaeum, the Barracks house the entirety of the Campus' Martial Units when not on-duty. A network of Waystones connects to the Nexus within the Grand Hall of the Barracks, through which Custodes, Silverblades, and other security personnel can instantly reach strategic positions within the Campus.</p>
+        `
+      },
+      {
+        id: 'terraces',
+        title: 'Cliff Terraces & Specialized Halls',
+        content: `
+          <p>The Athenaeum is literally terraced into and upon the cliff. Each terrace holds a cluster of buildings devoted to a specific branch of lunar sorcery.</p>
+
+          <div class="corps-block">
+            <div class="corps-title"><span class="lore-badge badge-frost">Frost</span> The Frozen Terraces</div>
+            <div class="corps-mandate">Cold-sustaining theaters where pure ice and moon-ice techniques are refined.</div>
+            <p style="font-size:0.95rem;color:var(--silver-mid);">Frostforges and ranges extend over the sea so practitioners can safely test shards, glacial pillars, and freezing gales. Complete insulation, enchanted obelisks storing lunar chill — always covered in a layer of rime.</p>
+          </div>
+
+          <div class="corps-block">
+            <div class="corps-title"><span class="lore-badge badge-cosmic">Cosmic</span> The Astrarium & Cosmic Hall</div>
+            <div class="corps-mandate">A great domed observatory with polished glass and a rotatable dial of star-plates.</div>
+            <p style="font-size:0.95rem;color:var(--silver-mid);">Cosmic invocations are studied here. The hall contains the Constellarium: a map of sky-forms and celestial arrays. Observatory terraces contain star-beacons that channel distant starlight into raw energetic lattices.</p>
+          </div>
+
+          <div class="corps-block">
+            <div class="corps-title"><span class="lore-badge badge-night">Night</span> The Night Halls & Illusory Gardens</div>
+            <div class="corps-mandate">A labyrinthine set of halls and mirrored galleries for perception-bending and psychological resistance.</div>
+            <p style="font-size:0.95rem;color:var(--silver-mid);">Features water-mirror pools and soundscapes that can alter mood and memory. They are the crucible to emergency tunnel systems spanning the entirety of the Campus, as well as a lower cliff garden of polished pools and cerulean flowers for glamour practice.</p>
+          </div>
+
+          <div class="corps-block">
+            <div class="corps-title"><span class="lore-badge badge-silverblade">Silverblade</span> The College of Arms</div>
+            <div class="corps-mandate">Adjacent to the Barracks — where security personnel begin their martial training.</div>
+            <p style="font-size:0.95rem;color:var(--silver-mid);">After choosing to specialize in martial subjects, students complete a formative course tailored to one of the various military organizations of the Athenaeum.</p>
+          </div>
+
+          <div class="corps-block">
+            <div class="corps-title"><span class="lore-badge badge-selenurgy">Selenurgy</span> The Hall of Reflections</div>
+            <div class="corps-mandate">A wide circular amphitheater with a polished lunar basin in its center reflecting a perfect, amplified moon.</div>
+            <p style="font-size:0.95rem;color:var(--silver-mid);">Full-Moon rites and mass-casting lunar spells are rehearsed here. The amphitheater's sound and mana acoustics magnify unified intent to tremendous effect.</p>
+          </div>
+        `
+      },
+      {
+        id: 'important-structures',
+        title: 'Important Structures',
+        content: `
+          <div class="subsection-title">The Inner Sanctum</div>
+          <p>The Athenaeum's most exclusive and sacrosanct structure, located atop the highest peak of the cliffs. Split between two chambers:</p>
+
+          <div class="tenet-block">
+            <div class="tenet-label">The High Spire</div>
+            <p class="tenet-text">The primary sanctum and research hall for the highest ranking officials. A tall, elegant spire with crystal windows drinking the pale light of the eternal night. Within: a private library, countless studies, and the main ritual chamber. The Spire's apex contains the <span class="highlight">Evernight Nexus</span>: an artifact that stabilizes the Athenaeum's nocturnal climate and magnifies lunar sorcery, accessible only to Isolde.</p>
+          </div>
+
+          <div class="tenet-block">
+            <div class="tenet-label">Isolde's Sanctum</div>
+            <p class="tenet-text">Private study, observation balcony over the sea, and a small inner chamber of perfect silence for trance and concentrated casting. Access restricted by the Gate's Lock of Sovereignty, which only she may harness to teleport within the Sanctum.</p>
+          </div>
+
+          <div class="subsection-title">The Grand Library</div>
+          <p>A massive hall containing so vast a number of books that the Athenaeum organizes and maintains it through spellwork rather than human personnel. The Librarian Conclave within is strictly there to enforce library rules rather than curate books. Public-access to all registered students bearing an Academy Gnostic Stone.</p>
+
+          <div class="subsection-title">Sea Platforms, Boat-Haven & Moon-Docks</div>
+          <p>Tucked beneath the cliffs, accessed by concealed lifts and tunnels, are docks for discreet arrivals by sea. The mist and the cliffs make sea approach perilous to all but the Athenaeum's pilots. Moon-docks double as testing ranges for coastal defense drills and tide-binding experiments.</p>
+
+          <div class="subsection-title">The Lyceum Hall</div>
+          <p>A complex of gargantuan lecture halls where a vast majority of apprenticeship takes place. Professional researchers use this space alongside pupils, functioning as internships for students whilst assisting the researcher.</p>
+
+          <div class="moon-divider">◈</div>
+
+          <div class="subsection-title">The Subastral Matrix of Lunar Resonance</div>
+          <div class="quote-block">
+            <p>The Athenaeum possesses more than the structures which meet the eye. Hidden below the cliffs, deep beneath the earth, a pillar of pure magical energy is channeled to maintain the enchantments that protect the Academy.</p>
+          </div>
+          <ul class="lore-list">
+            <li>Threads of pure mana weave in circular formations, absorbing and dispersing anomalous waveforms.</li>
+            <li>The main pillar is funneled through mythril rings, allowing staff to regulate energetic concentration and output through magic circles embedded on the links.</li>
+            <li>As a final security measure, the base contains a <em>Noetic Severance Node</em> capable of instantaneously and harmlessly deactivating the entire array in case of critical failure.</li>
+          </ul>
+        `
+      },
+      {
+        id: 'defenses',
+        title: 'Defensive & Operational Mechanics',
+        content: `
+          <div class="rank-item">
+            <div class="rank-name">The Veil</div>
+            <div class="rank-desc">The silver mist that permeates the Riftlands bends the paths of those unwelcome; together with the Gate's locks they make a forced approach so slow and confusing that most attackers would rather give up.</div>
+          </div>
+          <div class="rank-item">
+            <div class="rank-name">Bridge Collapse Runes</div>
+            <div class="rank-desc">Segments of the Moonway contain concealed runes able to collapse the bridge into the sea if necessary, effectively isolating the Athenaeum. The Campus can sustain itself self-sufficiently for an indefinite period when isolated.</div>
+          </div>
+          <div class="rank-item">
+            <div class="rank-name">Moonbeacons & Alarms</div>
+            <div class="rank-desc">Across the Campus, Moonbeacons flash coded signals through the sky to warn the whole Academy in case of a security breach, including detailed signal specifics.</div>
+          </div>
+          <div class="rank-item">
+            <div class="rank-name">Illusory Redirection</div>
+            <div class="rank-desc">Should an enemy somehow reach the Campus, mana can be redirected to quickly engulf the area within the same silver mist of the Riftlands.</div>
+          </div>
+          <div class="rank-item">
+            <div class="rank-name">Tidal Defenses</div>
+            <div class="rank-desc">Sea platforms have dedicated personnel who can freeze incoming boats or conjure waves tidal enough to capsize most medium-to-small vessels.</div>
+          </div>
+          <div class="rank-item">
+            <div class="rank-name">Astral Batteries</div>
+            <div class="rank-desc">Outer walls and vantage points possess moonstones channeling magic in pre-cast explosive motes, releasable against assailants or in rapid-fire volleys for precision strikes.</div>
+          </div>
+          <div class="rank-item">
+            <div class="rank-name">The Amphitheater of Tides</div>
+            <div class="rank-desc">An open field concealed beneath the cliffs, touching the stormy shores adjacent to the docks. Serves to completely freeze the entire lower complex should an enemy navy manage to breach the Moondocks.</div>
+          </div>
+        `
+      }
+    ]
+  },
+
+  /* ─── III: LUNAR SORCERY ─── */
+  'lunar-sorcery': {
+    title: 'Lunar Sorcery',
+    subtitle: 'ARCHIVE III — THE ARTS OF THE MOON',
+    epigraph: '"If the world will not grant us a dawn, then let us shape a tomorrow that answers to no sun."',
+    icon: `<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"><circle cx="30" cy="30" r="20" fill="none" stroke="rgba(200,200,255,0.3)" stroke-width="1"/><path d="M30,10 A20,20 0 1,0 30,50 A14,14 0 1,1 30,10Z" fill="rgba(200,200,255,0.12)" stroke="rgba(200,200,255,0.6)" stroke-width="1"/><circle cx="30" cy="30" r="2.5" fill="rgba(200,200,255,0.5)"/><line x1="30" y1="2" x2="30" y2="10" stroke="rgba(200,200,255,0.4)" stroke-width="1"/><line x1="30" y1="50" x2="30" y2="58" stroke="rgba(200,200,255,0.4)" stroke-width="1"/><line x1="2" y1="30" x2="10" y2="30" stroke="rgba(200,200,255,0.4)" stroke-width="1"/><line x1="50" y1="30" x2="58" y2="30" stroke="rgba(200,200,255,0.4)" stroke-width="1"/></svg>`,
+    sections: [
+      {
+        id: 'doctrine',
+        title: 'Foundation & Doctrine',
+        content: `
+          <div class="subsection-title">Functional Principia</div>
+          <p>Lunar Sorcery rests on five operational axioms:</p>
+
+          <div class="tenet-block">
+            <div class="tenet-label">Causality</div>
+            <p class="tenet-text">A spell is an arranged causal sequence: the caster's <em>intent</em> (what is to be changed), a learned <em>formula</em> (words, gestures, rhythm that pattern the change), a <em>focus</em> (an instrument, pool, or sigil that localizes the effect), and a <em>channel</em> (the path the magic travels: from caster → focus → world).</p>
+          </div>
+
+          <div class="tenet-block">
+            <div class="tenet-label">Precision</div>
+            <p class="tenet-text">Lunar casting emphasizes precision and design: smarter, better-prepared minds shape more subtle and durable results. Mistakes in the formula typically cause misdirection or weakening rather than raw explosion; the Moon's temper favors finesse over force.</p>
+          </div>
+
+          <div class="tenet-block">
+            <div class="tenet-label">Phase Resonance</div>
+            <p class="tenet-text">The moon's phase alters not only potency but the quality of effect — aligning the type of sorcery to the phase is critical for optimal casting.</p>
+          </div>
+
+          <div class="tenet-block">
+            <div class="tenet-label">Resonant Substrates</div>
+            <p class="tenet-text">Certain materials naturally share harmonic properties with lunar energy and so amplify, store or conduct it. Silver conducts reflected light and sharpens Silverblade sorceries; moonstones and mana gems hold charge and slowly leak it in calibrated pulses.</p>
+          </div>
+
+          <div class="tenet-block">
+            <div class="tenet-label">Conservation & Tethering</div>
+            <p class="tenet-text">Lunar magic seldom creates raw energy; it tethers and transforms. A spell draws from a source (mainly the caster's reserves), routes through the weave, and leaves a tethered trace unless formally released. Responsible practice therefore includes explicit release or decay rituals to avoid lingering bonds or ecological drain.</p>
+          </div>
+
+          <div class="moon-divider">◈</div>
+
+          <div class="subsection-title">The Five Tenets</div>
+          <p>The canonical dogma of Lunar Sorcery insists on the pursuit, preservation and careful guidance of change rather than conquest. These tenets are invoked in judicial hearings within cloisters and taught from first lecture to final defense.</p>
+
+          <div class="tenet-block"><div class="tenet-label">First Tenet</div><p class="tenet-text"><em>Incommensurability of Forced Illumination</em> — do not impose will upon another to contravene their reflective autonomy.</p></div>
+          <div class="tenet-block"><div class="tenet-label">Second Tenet</div><p class="tenet-text"><em>Preservation of the Community</em> — protect fellow Metyrians and their secrecy when disclosure would cause harm.</p></div>
+          <div class="tenet-block"><div class="tenet-label">Third Tenet</div><p class="tenet-text"><em>Calibration to Cycle</em> — always harmonize practice with lunar phase and local ecology.</p></div>
+          <div class="tenet-block"><div class="tenet-label">Fourth Tenet</div><p class="tenet-text"><em>Proportionality of Force</em> — harm caused by a defensive or corrective rite must be proportionate to the harm averted; retaliation that exceeds necessary remediation is forbidden.</p></div>
+          <div class="tenet-block"><div class="tenet-label">Fifth Tenet</div><p class="tenet-text"><em>No Masters, No Gods</em> — Metyrian Sorcerers recognize no authority other than those within their own hierarchies. Compliance with external authority is never obliged, if not out of courtesy.</p></div>
+        `
+      },
+      {
+        id: 'disciplines',
+        title: 'The Five Disciplines',
+        content: `
+          <div class="spell-block">
+            <div class="spell-name"><span class="lore-badge badge-frost">Frost</span> Frost Sorcery — The Cold Aspect</div>
+            <p class="spell-desc">Born during the Aetherian persecutions through the efforts of a desperate cloister, needing to preserve food over long periods. The first known example is a cooling charm used to keep meat frozen and preserve medicinal herbs. Frost magic uses lunar chill, reflective crystalline lattices and early-morning hoar to shape glass-like effects. Techniques emphasize careful application and precise cooling sequences. Notably difficult to master due to the severe difficulty in calculating precise temperature conversion formulae — however, once memorized, such formulae can be applied with great speed.</p>
+          </div>
+
+          <div class="spell-block">
+            <div class="spell-name"><span class="lore-badge badge-cosmic">Cosmic</span> Cosmic Sorcery — The Astral Aspect</div>
+            <p class="spell-desc">One of the founding branches, born in a second moment compared to its counterparts. Through its introduction, the first stargazers were able to decipher the cosmos as a whole, framing the moon in a wider context that aided the expansion of Lunar disciplines collectively. Cosmic Lunar work aligns moonlight with stellar influence — less about reflection and more about attuning local reflections to distant harmonics. Requires astronomical awareness and a high order of knowledge of celestial bodies. Considered especially difficult due to the sheer number of variables, including Constellations visible from Earth.</p>
+          </div>
+
+          <div class="spell-block">
+            <div class="spell-name"><span class="lore-badge badge-night">Night</span> Night Sorcery — The Nocturnal Aspect</div>
+            <p class="spell-desc">The second founding branch of Lunar Sorcery. Originally born as a study of Lunar Phases, it quickly grew to encompass illusory magics due to the Cloisters' necessity to hide from Aetherian inquisitors. Night magic manipulates darkness and shadows; practitioners learn to weave veils that render places and people less legible. Among the easiest to cast — requiring either understanding of Lunar Phases or of glamours and illusions, rarely both combined. Highly favored by early sorcerers for this reliability. Strictly governed by ethics due to obvious misuse potential.</p>
+          </div>
+
+          <div class="spell-block">
+            <div class="spell-name"><span class="lore-badge badge-silverblade">Silverblade</span> Silverblade Sorcery — The Cutting Aspect</div>
+            <p class="spell-desc">The most recent addition, honed and perfected by the Silverlight Sage as tribute to his beloved mother. Silverblade is the combative and surgical branch: it refines reflected light into edges and channels, either as weightless extensions anchored to a physical blade used as a catalyst, or as wholly ethereal blades that hang and move in the air. Unlike other disciplines, it requires a combination of theoretical studies, spellwork practice, and physical training — considered by most the most difficult type to master, not due to any complexity in the spellworking itself, but the sheer amount of training required to pass candidacy.</p>
+          </div>
+
+          <div class="spell-block">
+            <div class="spell-name"><span class="lore-badge badge-selenurgy">Selenurgy</span> Selenurgy — The Lunar Aspect</div>
+            <p class="spell-desc">The first ever branch of Lunar Sorcery, also known as the Sorceries of the Plenilune. The core craft of transforming lunar flux into usable force: weaving moonlight into spells and sigils, accelerating phase resonance, and shaping containers made of reflected force. Encompasses every other type of Lunar Sorcery whilst specifically focusing on spellcasting through the weaving of lunar currents, strongest during the Full Moon. Undoubtedly the most complex branch — the formulae are not the most difficult, however casting is confounding. There is no deterministic formula; the caster must learn to <em>understand</em> the Moon rather than study it. Only those who have achieved the rank of Master can cast any Selenurgic spell.</p>
+          </div>
+        `
+      },
+      {
+        id: 'phases',
+        title: 'Lunar Phases & Casting',
+        content: `
+          <p>The Moon's phase alters not only the potency of Lunar magic but its very quality. A practitioner who ignores the phase ignores half the art. The following phase-table correlates act-type with phase:</p>
+
+          <div class="phase-grid">
+            <div class="phase-item">
+              <div class="phase-symbol">🌑</div>
+              <div class="phase-name">New Moon</div>
+              <div class="phase-effect">Bolsters Nocturnal & Frost Sorceries</div>
+            </div>
+            <div class="phase-item">
+              <div class="phase-symbol">🌒</div>
+              <div class="phase-name">Crescent</div>
+              <div class="phase-effect">Bolsters Cosmic & Frost Sorceries</div>
+            </div>
+            <div class="phase-item">
+              <div class="phase-symbol">🌓</div>
+              <div class="phase-name">Quarter</div>
+              <div class="phase-effect">Bolsters Silverblade Sorceries</div>
+            </div>
+            <div class="phase-item">
+              <div class="phase-symbol">🌔</div>
+              <div class="phase-name">Gibbous</div>
+              <div class="phase-effect">Bolsters all Sorceries except Selenurgic & Silverblade</div>
+            </div>
+            <div class="phase-item">
+              <div class="phase-symbol">🌕</div>
+              <div class="phase-name">Full Moon</div>
+              <div class="phase-effect">Bolsters all Lunar Sorceries, especially Selenurgic</div>
+            </div>
+          </div>
+
+          <div class="subsection-title">Academic Progression</div>
+          <p>The academic structure proceeds stepwise through five ranks:</p>
+          <div class="rank-item"><div class="rank-name">Initiate</div><div class="rank-desc">Theoretical fundamentals, Tools, Introductions to spellcasting, Ethics.</div></div>
+          <div class="rank-item"><div class="rank-name">Junior</div><div class="rank-desc">Phase calculus, Philosophy, Selenurgy labs, Amateur spellcasting.</div></div>
+          <div class="rank-item"><div class="rank-name">Adept</div><div class="rank-desc">Independent rite design, Thaumaturgy, Intermediate spellcasting.</div></div>
+          <div class="rank-item"><div class="rank-name">Senior</div><div class="rank-desc">Pedagogy, Student leadership, Independent Research, Advanced Spellcasting.</div></div>
+          <div class="rank-item"><div class="rank-name">Silverblade</div><div class="rank-desc">Divergent from other disciplines — exclusively teaching the Silverblade Curriculum, usually undertaken from Adept students upward.</div></div>
+        `
+      },
+      {
+        id: 'notable-spells',
+        title: 'Notable Sorceries',
+        content: `
+          <div class="glyph-separator">✦ Frost Sorceries ✦</div>
+
+          <div class="spell-block">
+            <div class="spell-name">Glacialis Suspirii <span class="spell-tag badge-frost">Frost</span></div>
+            <p class="spell-desc">A masterwork of Frost evocation: temperature collapses in a near-instant radius, halting air and sound alike. It acts like a shockwave which immobilizes rather than knocks back.</p>
+          </div>
+          <div class="spell-block">
+            <div class="spell-name">Shatterwake <span class="spell-tag badge-frost">Frost</span></div>
+            <p class="spell-desc">A violent dispersal of stored mana through solid surfaces, producing fractal explosions of shimmering shards from aforementioned surfaces. Its reflective debris often fuels secondary spells.</p>
+          </div>
+          <div class="spell-block">
+            <div class="spell-name">The Stillborn Storm <span class="spell-tag badge-frost">Frost</span></div>
+            <p class="spell-desc">Summons a vortex of frozen wind lined with ice shards that consumes mana not just from the caster's source, but from foes within its perimeter; the shards additionally harm the freezing foes. A favorite defensive invocation among cloister guards.</p>
+          </div>
+
+          <div class="glyph-separator">✦ Cosmic Sorceries ✦</div>
+
+          <div class="spell-block">
+            <div class="spell-name">Shroudpiercer <span class="spell-tag badge-cosmic">Cosmic</span></div>
+            <p class="spell-desc">A counter-charm, masterpiece of the most accomplished minds of the Athenaeum. A spell capable of not only navigating the silver mist of the Riftlands, but also of unmaking illusions and charms.</p>
+          </div>
+          <div class="spell-block">
+            <div class="spell-name">The Silver Equation <span class="spell-tag badge-cosmic">Cosmic</span></div>
+            <p class="spell-desc">A complex ritual aligning celestial harmonics to momentarily bend local gravity, allowing short flight or altered trajectories. Named after the contents of Isolde's treatise "On Lunar Mechanics and Falling Bodies." Mastered only by her and ten of her faculty members.</p>
+          </div>
+          <div class="spell-block">
+            <div class="spell-name">The Transient Eclipse <span class="spell-tag badge-cosmic">Cosmic</span></div>
+            <p class="spell-desc">Momentarily borrows from Isolde's charm of eternal night on the Riftlands, triggering an eclipse in the caster's surroundings wherein only lunar magic remains active. An act of absolute dominance, often prohibited outside academy duels. Only Master-level sorcerers have been able to learn this spell.</p>
+          </div>
+
+          <div class="glyph-separator">✦ Night Sorceries ✦</div>
+
+          <div class="spell-block">
+            <div class="spell-name">Umbra's Veil <span class="spell-tag badge-night">Night</span></div>
+            <p class="spell-desc">A high discipline illusory charm that does two things: firstly it makes the caster vanish in an azure mist, teleporting to a position of their choosing within line of sight and at most 10 meters; secondly it creates up to 3 mirror images in different locations, leaving the enemy confused as to which is real.</p>
+          </div>
+          <div class="spell-block">
+            <div class="spell-name">Ephemeris' End <span class="spell-tag badge-night">Night</span></div>
+            <p class="spell-desc">A pulse of energy that may randomly project the image of a lunar phase. The shockwave's power increases in proportion to how full the projection is. Should an eclipse's image appear, all of the caster's sorceries additionally triple in power for 5 turns.</p>
+          </div>
+          <div class="spell-block">
+            <div class="spell-name">Nocturne of Asphodels <span class="spell-tag badge-night">Night</span></div>
+            <p class="spell-desc">A rare invocation taught only to Lunarchs and above, allowing the caster to conjure a field of asphodels through ritual dance and song. These asphodels shed their petals, which turn into sharp blades homing in on enemy targets en masse. The size of the field — and therefore the potency — is tied to the caster's mana reserve.</p>
+          </div>
+
+          <div class="glyph-separator">✦ Silverblade Sorceries ✦</div>
+
+          <div class="spell-block">
+            <div class="spell-name">Ethersheen Dance <span class="spell-tag badge-silverblade">Silverblade</span></div>
+            <p class="spell-desc">Refines mana into an arc of ethereal blades before the caster, catalyzing their intent and moving in tandem. The blades (maximum 5) move in precise synchronicity unless manually overridden by the caster.</p>
+          </div>
+          <div class="spell-block">
+            <div class="spell-name">Aureole of Apostasy <span class="spell-tag badge-silverblade">Silverblade</span></div>
+            <p class="spell-desc">The caster's blade or staff acts as conduit, conjuring ethereal edges of a blade much larger than the original — yet unchanged in weight. The caster can fight as normal but the range and potency is doubled; mundane materials often fail to block its path. Additionally, the caster can conjure a cutting arc when they swing out of range, roughly 2 meters in length and thin as a razor.</p>
+          </div>
+          <div class="spell-block">
+            <div class="spell-name">Eidolon of Fortitude <span class="spell-tag badge-silverblade">Silverblade</span></div>
+            <p class="spell-desc">Conditional to the caster wielding a shield or substitute, this sorcery uses the shield as centerpiece to form a sturdy barrier. The strength and range of the barrier are inversely proportional — the larger it is, the weaker it becomes.</p>
+          </div>
+
+          <div class="glyph-separator">✦ Selenurgic Sorceries ✦</div>
+
+          <div class="spell-block">
+            <div class="spell-name">Noctilucent Spire <span class="spell-tag badge-selenurgy">Selenurgy</span></div>
+            <p class="spell-desc">One of Isolde's crown jewels — a spell which only she and the Silverblade Commanders are allowed to master. Conjures grandiose pillars of concentrated moonlight striking down on foes with potency akin to a "smite." Additionally, when used in siege, the spell holds the ability to uproot foundation deep within the ground — capable of collapsing hidden tunnels and destroying fortifications.</p>
+          </div>
+          <div class="spell-block">
+            <div class="spell-name">Coronation of the Pale Sovereign <span class="spell-tag badge-selenurgy">Selenurgy</span></div>
+            <p class="spell-desc">A spell mastered only by Isolde herself. When in peril, Isolde may invoke the moon's full power, conjuring forth a Plenilune regardless of cycle or time of day. In such a state, a halo of silver crowns her head and her gaze shines an uncanny pale light. This effect persists until victory or defeat.</p>
+          </div>
+          <div class="spell-block">
+            <div class="spell-name">Invocation of the Riftlight <span class="spell-tag badge-selenurgy">Selenurgy</span></div>
+            <p class="spell-desc">Isolde's greatest achievement: the enchantment that cloaked the Riftlands in perpetual night. The spell works through a mixture of illusion and actuation, tracking the cosmos' motions through a lattice of mana, then projecting them into the sky of the Riftlands. Accessory cloaking charms filter sunlight so that its effects are still felt. Each night is marked by the shift of the moon's phases to make tracking of time possible.</p>
+          </div>
+        `
+      },
+      {
+        id: 'ultimate-arts',
+        title: 'The Ultimate Arts',
+        content: `
+          <div class="warning-block">
+            <p>This treatise is reserved for the Archmagus only. The sorceries documented herein represent the apex of Metyrian martial and arcane capability.</p>
+          </div>
+
+          <div class="spell-block">
+            <div class="spell-name">The Pale Silence of the Last Winter <span class="spell-tag badge-frost">Frost — Ultimate</span></div>
+            <p class="spell-desc">The caster invokes a memory of a primordial winter that once halted the turning of the heavens, lifting themselves skyward dozens of feet in the air as centerpiece of a vast crystalline array spanning hundreds of feet. The array collapses downward, crushing foes; the branches burst into thousands of sharp jagged shards; finally a freezing mist spreads across the area of effect. <em>Additional Effect: Cathedral of Frozen Echoes</em> — Northern Lights appear and arrange themselves as a cathedral's dome for 3 turns, increasing all defenses by 1.5x.</p>
+          </div>
+
+          <div class="spell-block">
+            <div class="spell-name">Event Horizon: Sovereign Singularity <span class="spell-tag badge-cosmic">Cosmic — Ultimate</span></div>
+            <p class="spell-desc">The caster flies up and slices open a rift in the sky. The rift takes the shape of an event horizon, and hundreds of spears of silver light rain down from the opening, striking the ground indiscriminately and exploding on impact. <em>Additional Effect: Aphelion Authority</em> — Sources of other sorceries are dimmed, reducing their efficacy. Spells aimed at the caster are absorbed into the singularity and converted into raw power.</p>
+          </div>
+
+          <div class="spell-block">
+            <div class="spell-name">The Eclipse of Self <span class="spell-tag badge-night">Night — Ultimate</span></div>
+            <p class="spell-desc">The caster creates a perfect copy of a single target: colorless and glowing a faint silver sheen. The target's vital and magical power is gradually sapped over 5 turns for as long as the clone remains alive. The target grows weaker with each turn; should the clone survive the countdown, the target is knocked out from atrophy.</p>
+          </div>
+
+          <div class="spell-block">
+            <div class="spell-name">The Final Testament of the Silver Order <span class="spell-tag badge-silverblade">Silverblade — Ultimate</span></div>
+            <p class="spell-desc">The caster vests themselves in a sheen of pure lunar radiance. Their power is amplified tenfold across all fronts. The caster can no longer be healed, but in turn cannot perish until the duration (5 turns) has passed. Their attacks can no longer be stopped by conventional means, and physical and magical attributes increase by ×5.</p>
+          </div>
+
+          <div class="spell-block">
+            <div class="spell-name">Syzygy Imperative <span class="spell-tag badge-selenurgy">Selenurgy — Ultimate</span></div>
+            <p class="spell-desc">The caster becomes one with the Lunar Trinity, glowing with otherworldly light as pure energy gathers within them. The ensuing shockwave phases through the being of all targets, afflicting them with <em>Ateleic Dissonance</em> — failing to properly coordinate their spellwork, as if their entire body is out of tune with their magic. Should the condition trigger <em>Convergence Pulse</em> three times, the target is either knocked out or perishes. Duration: 10 turns. <em>Additional Effect: The Vertical Axis</em> — a pillar of lunar energy strikes down from the heavens on the caster's original position, engulfing them in a nigh-impregnable barrier.</p>
+          </div>
+
+          <div class="moon-divider">◈</div>
+
+          <div class="subsection-title" style="text-align:center;color:var(--silver-pure);">The Saros Convergence</div>
+          <div class="forbidden-block" style="border-color:rgba(200,200,255,0.15);">
+            <p style="font-family:var(--font-heading);font-size:0.7rem;letter-spacing:0.3em;text-align:center;color:var(--silver-dim);margin-bottom:1.5rem;">THE CULMINATION OF ALL LUNAR SORCERY</p>
+            <p>The caster lifts to the heavens, surrounding themselves with a gargantuan magical array, then another, and another, until they are surrounded by what looks like a projection of the full moon looming over the battlefield. The collective of arrays begins pulsating, releasing an omnidirectional blast of concentrated energy — dealing extreme damage and hurling enemies outward while scorching, freezing, and stunning simultaneously.</p>
+            <p>Simultaneously, a rain of colossal lances falls from the sky, each impact creating overlapping explosions of fire and ice. Dozens of beams erupt from the lunar projection, streaking lines of destruction across the battlefield. Ethereal clones of the caster descend in arched trajectories bearing down with cleaving scythe swings, each dissipating immediately and leaving 10 homing pellets targeting the closest enemy.</p>
+            <p>Finally, a single concentrated beam strikes the ground right beneath the lunar projection, causing 3 successive shockwaves — and each of the aforementioned attacks additionally triggers chain reactions of overlapping shockwaves and mana fields causing implosions that deal escalating damage the farther they travel.</p>
+            <p style="font-family:var(--font-heading);font-size:0.7rem;letter-spacing:0.2em;color:rgba(200,200,200,0.5);margin-top:1rem;text-align:center;">RESTRICTED — CANNOT BE USED OUTSIDE PLANNED LORE SITUATIONS</p>
+          </div>
+        `
+      }
+    ]
+  },
+
+  /* ─── IV: SECURITY CORPS ─── */
+  security: {
+    title: 'The Security Corps',
+    subtitle: 'ARCHIVE IV — GUARDIANS OF THE VEIL',
+    epigraph: '"The Athenaeum does not rule by power alone, but by vigilance. Knowledge is guarded not because it is fragile, but because it is dangerous."',
+    icon: `<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"><path d="M30,5 L52,16 L52,34 Q52,52 30,56 Q8,52 8,34 L8,16 Z" fill="none" stroke="rgba(200,200,255,0.5)" stroke-width="1"/><path d="M30,12 L44,20 L44,34 Q44,46 30,50 Q16,46 16,34 L16,20 Z" fill="rgba(200,200,255,0.07)" stroke="rgba(200,200,255,0.3)" stroke-width="0.8"/><circle cx="30" cy="32" r="6" fill="none" stroke="rgba(200,200,255,0.5)" stroke-width="0.8"/><circle cx="30" cy="32" r="2" fill="rgba(200,200,255,0.4)"/></svg>`,
+    sections: [
+      {
+        id: 'gatewardens',
+        title: 'The Gatewardens',
+        content: `
+          <div class="quote-block">
+            <p>The Gatewardens are not a military force in the conventional sense. Their purpose is not conquest, patrol, or policing, but <em>containment</em>.</p>
+          </div>
+
+          <div class="corps-block">
+            <div class="corps-title">Mandate</div>
+            <div class="corps-mandate">A static, elite custodial order charged exclusively with the defense, maintenance, and regulation of the Gate of Seven Locks — the principal controlled access point into the Athenaeum.</div>
+            <p style="font-size:0.95rem;color:var(--silver-mid);">Their authority supersedes all other bodies <em>only within the Gate's immediate jurisdiction</em>. They answer to no higher authority, bypassing the chain of command and accepting orders only from the Archmagisterium.</p>
+          </div>
+
+          <div class="subsection-title">Jurisdiction</div>
+          <ul class="lore-list">
+            <li>The Gate of Seven Locks itself</li>
+            <li>The antechambers, holding halls, and verification courts attached to it</li>
+            <li>Any individual or object in active transit through the Gate</li>
+          </ul>
+          <p><em>Outside of this zone, Gatewardens possess no legal authority.</em></p>
+
+          <div class="subsection-title">Organization</div>
+          <div class="hierarchy-tree">
+            <div class="hierarchy-node"><div class="hierarchy-node-title">The Seven Keepers</div><div class="hierarchy-node-desc">Senior Gatewardens, each bound to one Lock. The only individuals permitted to oversee the unlocking, sealing, or reconfiguration of their assigned Lock.</div></div>
+            <div class="hierarchy-node"><div class="hierarchy-node-title">The Wardens</div><div class="hierarchy-node-desc">Fully inducted members, trained in layered warding magic, counter-ritual procedure, and emergency containment.</div></div>
+            <div class="hierarchy-node"><div class="hierarchy-node-title">The Guardians</div><div class="hierarchy-node-desc">The main defensive force, fielded only against large-scale threats.</div></div>
+            <div class="hierarchy-node"><div class="hierarchy-node-title">The Custodians</div><div class="hierarchy-node-desc">Non-combat specialists responsible for sigil maintenance, rune calibration, record-keeping, and inspection of transit artifacts.</div></div>
+          </div>
+
+          <div class="subsection-title">Perception</div>
+          <p>Within the Athenaeum the Gatewardens are respected but distant — almost clerical. Students rarely see them. Nightwardens do not command them. Midknights are barred from Gate operations entirely. To outsiders, they are mythologized far beyond their actual numbers, yet even the exaggerated tales of their power do not stray far from the truth.</p>
+        `
+      },
+      {
+        id: 'nightwardens',
+        title: 'The Nightwardens',
+        content: `
+          <div class="corps-block">
+            <div class="corps-title">Mandate</div>
+            <div class="corps-mandate">The primary armed force of the Athenaeum. External defense, expeditionary security, and enforcement of Athenaeum interests beyond the Campus.</div>
+            <p style="font-size:0.95rem;color:var(--silver-mid);">They are soldiers first, scholars second. Deployed when Athenaeum holdings are threatened, arcane sites of interest require securing, diplomatic missions demand visible force, or war becomes unavoidable.</p>
+          </div>
+
+          <div class="subsection-title">Jurisdiction</div>
+          <ul class="lore-list">
+            <li>All territories, enclaves, and expeditions formally claimed or sponsored by the Athenaeum</li>
+            <li>Battlefields, border fortresses, and arcane exclusion zones</li>
+          </ul>
+          <p><em>They possess no policing authority within the Campus proper unless invited by the Midknights or decreed by the Conclave.</em></p>
+
+          <div class="subsection-title">Organization</div>
+          <div class="hierarchy-tree">
+            <div class="hierarchy-node"><div class="hierarchy-node-title">The High Noctarch</div><div class="hierarchy-node-desc">Supreme commander, appointed by the Conclave rather than risen through the ranks.</div></div>
+            <div class="hierarchy-node"><div class="hierarchy-node-title">The Noctarchs</div><div class="hierarchy-node-desc">Field commanders responsible for regions, campaigns, or standing garrisons.</div></div>
+            <div class="hierarchy-node"><div class="hierarchy-node-title">The Cohorts</div><div class="hierarchy-node-desc">Standard operational units, each combining Battlemages, Heavy Infantry, Arcane Batteries and Support Units.</div></div>
+            <div class="hierarchy-node"><div class="hierarchy-node-title">The Auxiliaries</div><div class="hierarchy-node-desc">Reserve forces to avoid a sudden shortage of men in battle. Bear the same characteristics as the Cohorts.</div></div>
+          </div>
+
+          <div class="subsection-title">Perception</div>
+          <p>Abroad, the Nightwardens are feared and respected. Within the Athenaeum, they are seen as necessary but blunt instruments — too loud, too visible, too martial for academic comfort. Their presence on Campus grounds is limited when on-duty, though they are afforded the same liberties as everyone else when off-duty and not in armor. They are often admired for their physical strength and discipline, making them great propaganda material.</p>
+        `
+      },
+      {
+        id: 'custodes',
+        title: 'The Custodes Velati',
+        content: `
+          <div class="corps-block">
+            <div class="corps-title">Mandate</div>
+            <div class="corps-mandate">The internal security, investigative, and disciplinary arm of the Athenaeum Campus itself.</div>
+            <p style="font-size:0.95rem;color:var(--silver-mid);">They exist to ensure that the Athenaeum does not destroy itself from within. They police students, faculty, researchers, visitors, and internal conspiracy.</p>
+          </div>
+
+          <div class="subsection-title">Jurisdiction</div>
+          <ul class="lore-list">
+            <li>All academic grounds, libraries, laboratories, dormitories, administrative halls</li>
+            <li>Temporary jurisdiction over visitors while on Campus</li>
+          </ul>
+          <p><em>They hold no authority beyond the Campus, and cannot pursue suspects outside Athenaeum grounds without Nightwarden cooperation.</em></p>
+
+          <div class="subsection-title">Organization</div>
+          <div class="hierarchy-tree">
+            <div class="hierarchy-node"><div class="hierarchy-node-title">The High Marshall</div><div class="hierarchy-node-desc">Head of the Midknights, responsible for discipline and internal stability.</div></div>
+            <div class="hierarchy-node"><div class="hierarchy-node-title">The Marshals</div><div class="hierarchy-node-desc">Senior officers overseeing districts or major facilities.</div></div>
+            <div class="hierarchy-node"><div class="hierarchy-node-title">The Knights</div><div class="hierarchy-node-desc">Rank-and-file operatives, trained in investigation, arrest, and magical restraint.</div></div>
+            <div class="hierarchy-node"><div class="hierarchy-node-title">The Wardens</div><div class="hierarchy-node-desc">Backbone of the law enforcement and policing force.</div></div>
+            <div class="hierarchy-node"><div class="hierarchy-node-title">The Inquestors</div><div class="hierarchy-node-desc">Specialists assigned to interrogations, evidence analysis, and internal trials.</div></div>
+          </div>
+
+          <div class="subsection-title">Perception</div>
+          <p>There is no outside perception of these men, for they only affect those who live within the Athenaeum. Students, faculty and administrators alike dread their arrival, yet recognize that they are the only thing protecting their safe haven from descending into corruption, lawlessness and danger. For that, they are eternally grateful.</p>
+        `
+      },
+      {
+        id: 'silverblades',
+        title: 'The Silverblades',
+        content: `
+          <div class="quote-block">
+            <p>The Silverblades are not a standing force. They are not deployed routinely. They exist solely for <span class="highlight">crisis containment</span>.</p>
+          </div>
+
+          <div class="corps-block">
+            <div class="corps-title">Mandate</div>
+            <div class="corps-mandate">An elite, cross-jurisdictional rapid-response corps, created to act where the strict separation of authority between other corps becomes a liability.</div>
+            <p style="font-size:0.95rem;color:var(--silver-mid);">Their deployment is viewed with great anxiety, for it means the Archmagisterium has determined the situation to be an <em>existential</em> matter. Their mandate is: containment first, continuity second, justice last.</p>
+          </div>
+
+          <div class="subsection-title">Authorization</div>
+          <p>The Silverblades are authorized to:</p>
+          <ul class="lore-list">
+            <li>Defend the Gate of Seven Locks when Gatewardens are overwhelmed or compromised</li>
+            <li>Suppress internal catastrophes within the Campus beyond Midknight capacity</li>
+            <li>Conduct precision military action where Nightwarden response would be too slow, visible, or destructive</li>
+            <li>Stabilize rapidly escalating arcane emergencies, breaches, or coups</li>
+          </ul>
+          <p>They are empowered to temporarily assume the functional duties of all other corps — but only under specific emergency statutes. Upon activation, Silverblades are granted <em>temporary universal jurisdiction</em>, time-limited, mission-specific, and automatically expiring once the crisis is declared resolved.</p>
+
+          <div class="subsection-title">Organization</div>
+          <div class="hierarchy-tree">
+            <div class="hierarchy-node"><div class="hierarchy-node-title">The Chief Silverguard</div><div class="hierarchy-node-desc">Supreme commander of the corps. Singular and absolute during activation. The current Chief Silverguard is <span class="highlight">Lev</span>, the Silverlight Sage.</div></div>
+            <div class="hierarchy-node"><div class="hierarchy-node-title">The Argent Conclave</div><div class="hierarchy-node-desc">A small advisory body of senior Silverblades responsible for operational planning, legal compliance, and post-action review. They advise; they do not command.</div></div>
+            <div class="hierarchy-node"><div class="hierarchy-node-title">The Pale Polemarchs</div><div class="hierarchy-node-desc">The bulk of Silverblade Field Command, each in charge of their own virtually independent corps, capable of splitting off flexibly at the slightest change in strategy mid-battle.</div></div>
+            <div class="hierarchy-node"><div class="hierarchy-node-title">The Silverblades</div><div class="hierarchy-node-desc">Fully inducted operatives, trained across multiple fields from internal security to battlefield command and Gate protocols.</div></div>
+            <div class="hierarchy-node"><div class="hierarchy-node-title">The Field Specialists</div><div class="hierarchy-node-desc">Specialists trained for support roles: medical, engineering, logistics.</div></div>
+          </div>
+
+          <div class="subsection-title">Perception</div>
+          <p>The Silverblades are oftentimes idolized by students, especially Seniors who have the chance to collaborate with them on occasion. They are viewed as undisputedly the strongest among the Athenaeum's security corps. Their exclusive use of <span class="highlight">Silverblade Sorcery</span> — unique among all members of the institute — has drawn the admiration and respect of not just the student body, but also of the faculty and the other military organizations.</p>
+        `
+      }
+    ]
+  },
+
+  /* ─── V: NOTABLE FIGURES ─── */
+  figures: {
+    title: 'Notable Figures',
+    subtitle: 'ARCHIVE V — LIVES OF THE LUMINARIES',
+    epigraph: '"Teacher and guardian, theory and edge."',
+    icon: `<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"><circle cx="30" cy="20" r="10" fill="none" stroke="rgba(200,200,255,0.5)" stroke-width="1"/><circle cx="30" cy="20" r="5" fill="rgba(200,200,255,0.1)"/><path d="M10,52 Q10,32 30,32 Q50,32 50,52" fill="none" stroke="rgba(200,200,255,0.5)" stroke-width="1"/><line x1="30" y1="10" x2="30" y2="4" stroke="rgba(200,200,255,0.3)" stroke-width="0.8"/><line x1="23" y1="13" x2="18" y2="7" stroke="rgba(200,200,255,0.2)" stroke-width="0.6"/><line x1="37" y1="13" x2="42" y2="7" stroke="rgba(200,200,255,0.2)" stroke-width="0.6"/></svg>`,
+    sections: [
+      {
+        id: 'isolde',
+        title: 'Isolde Metyr — The First Archmagus',
+        content: `
+          <div class="quote-block">
+            <p>And Isolde, who once hid beneath ruin and feigned death to live, presides with an austere mercy carved by loss and a firm guiding hand tempered by love — a leader whose tenderness is both a haven and a fortress.</p>
+          </div>
+
+          <div class="subsection-title">Origins</div>
+          <p>Many years before the reformations that loosened the Empire's golden fist, beneath the black ribs of a ruined lunar temple, Isolde first learned to practice the moon's secret rites by candlelight. Small, diligent syllables that warmed the dark with silver glimmers. The cloister that raised her kept its doors low and its voices lower still; rites were taught in whispers, maps folded into hem, and the lawless grammar of lunar geometry traced on the undersides of tables.</p>
+
+          <div class="subsection-title">The Purge</div>
+          <p>When the Solar Inquisition came — a bright and merciless ordinance — the cloister burned with the clean, cheerful cruelty of official righteousness. Isolde did what ragged saints and desperate children do: she learned the economy of absence. She feigned death, staged it with the cunning of one schooled in illusions, and let the world fold her away. Her funeral was an unceremonious affair that saw her tossed in a mass grave; her survival was a quiet, patient conspiracy.</p>
+
+          <div class="subsection-title">Loss & Covenant</div>
+          <p>Her lover died as a saint: not in the violence of battle but in the quiet, terrible grace of someone who chose to be a beacon. When the sun-guard broke the cloister's doors, he moved among the hiding places with a lantern and a steady voice, ushering children and mothers to evacuation — until the guards heard and came. They took him while he held Isolde's hand, and she felt the last warmth of him leave as if the moon had been plucked from the sky. His last words were a crooked blessing and a command folded into a kiss: <em>stay hidden, live</em>. She walked away with his name on her lips and his absence sharpened into covenant.</p>
+
+          <div class="subsection-title">The Unification</div>
+          <p>From ash and exile she wove channels: coded letters, hidden negotiations, couriers who moved like shadows through woodlands and cities alike. She forged communications and alliances among cloisters — a lattice of oaths and safe-havens — until scattered cells answered one another like a tide obeying the moon.</p>
+
+          <div class="subsection-title">The Name Metyr</div>
+          <p>A rival stood upon a hill of claims and titles, glittering with old grudges. In a moment that passed like a benediction, that rival surrendered the name of her house in public — a spectacle of renunciation and a pledge of fealty. Isolde, with a courtier's grace and a queen's temper, forgave. The forgiveness was not faint-hearted; it was a pact forged in broad daylight. From thereon Isolde donned the name of her rival, taken as her own: <span class="highlight">Metyr</span>. The tale became like myth amidst cloisters — the foundation for their kind's name: The Metyrians.</p>
+
+          <div class="subsection-title">Finding Lev</div>
+          <p>Among the ruined stones of a cloister that had once sung to the night, Isolde found herself moving like a slow tide, gathering the living from under collapsed beams. Beneath a fallen lectern she found a small child with soot on his cheek and eyes too old for his years, clinging to a singed talisman. She lifted him into her cloak as a mother would her child and named him <span class="highlight">Lev</span> — a single syllable that softened the somber fog of that day.</p>
+
+          <div class="subsection-title">The Athenaeum</div>
+          <p>When the reformations came and the Empire's edicts at last softened to permit lunar practice under law, Isolde gathered the cloisters beneath one great vaulted roof and named it: the Athenaeum of the Veil. When it first opened its marble heart to the night, Isolde stood upon the dais beneath a suspended mirror of moonlight and unrolled a scroll that seemed to have no end — one by one she spoke the names of the lost, every voice stilled by the purges, every cloister burned to silence, until the hall trembled with the weight of remembrance. No sermon followed, no applause broke the hush.</p>
+        `
+      },
+      {
+        id: 'lev',
+        title: 'Lev — The Silverlight Sage',
+        content: `
+          <div class="quote-block">
+            <p>"I am the edge of her will made manifest. Where she dreams, I stand watch."</p>
+            <p class="quote-attribution">— Lev, on the first night he took the Gate</p>
+          </div>
+
+          <div class="subsection-title">Origins</div>
+          <p>Lev's earliest memory is flame, the sickly clink of mail, and the world turned to ash. He was a child when a company of Aetherian knights rode down upon his cloister. That sanctuary — a small lunar cloister far from the capitals — was razed in a night of iron and sermon. Young Lev was found beneath a carved lintel, scorched and half-buried in the granulation of an old moonstone. He had lost family, name, and home before he could even form a proper sentence. It was Isolde Metyr who found him.</p>
+
+          <div class="subsection-title">Formation</div>
+          <p>Raised beneath Isolde's tutelage, Lev's reverence for her took on the full warmth of filial piety. He came to regard her not only as teacher and patron, but as mother, moral center, and the living lodestone of his purpose. He studied her magics until he could recite <em>The Harmonic Concord</em>'s cadences in his sleep; but he did not become merely a scholar.</p>
+          <p>He trained daily in the rituals of lunar attunement and spent equal hours learning how to stand and strike — running Moonway circuits at night, practicing silent footwork across the cliffs, tempering body and will until limb and spell were indistinguishable. His discipline made him brutal in a way that was also precise: the movement of a sword became a rhythm of moons and tides, a counting of breaths and phases.</p>
+
+          <div class="subsection-title">Silverblade Sorcery</div>
+          <p>Out of this synthesis Lev forged a doctrine and a name. He named the practice <span class="highlight">Silverblade Sorcery</span> in honor of Isolde: "silver" for the moon she taught them to read, "blade" for the instrument he believed must be both metaphysical and martial. The term caught on quickly — it described a new species of caster as likely to parry as to chant, to move like a dancer and cut like a storm.</p>
+
+          <p>Lev insisted it be Isolde's aegis: never a tool of conquest, always a bulwark for kin.</p>
+
+          <div class="subsection-title">Rise & Renown</div>
+          <p>Through decades of training, campaign, and command, Lev rose to unmatched martial-magical renown. Where Isolde remained the unrivaled architect of lunar sorcery, Lev became her living counterpart in fieldcraft: the second most powerful lunar sorcerer in the Empire and the foremost practitioner of Silverblade arts.</p>
+          <p>He could, in a heartbeat, condense the cold of a mountain into a blade's edge, or launch a starshard from a feint. He could move across the Veil with footsteps that left no trace, then cleave a ward as if cutting silk. Yet he never surpassed Isolde's breadth of theory; rather, he perfected her application.</p>
+
+          <div class="subsection-title">Chief Silverguard</div>
+          <p>Named <span class="highlight">Chief of Silverguard</span> (later styled "Captain-Sage of Security"), Lev organized the academy's defensive forces, wrote its martial disciplines, and oversaw the training programs that bound scholars to secrecy and protection. The Gate of Seven Locks and the Moonway, the patrols across the Veil, the Veilbound Sentinels and Nightwardens — much of their doctrine traces to his hand.</p>
+
+          <div class="subsection-title">Appearance & Manner</div>
+          <p>Physically, Lev is compact and coiled: muscular without too much lumber, quick-limbed with a dancer's balance. His features carry the marks of a hard life — a faint pallor under the moon, a pale scar across his forearm from a blade that misjudged its strike years ago. He favors muted garb: white silks upon a black shirt that swallows reflected light, always with a silver braid at his throat, a token of Isolde's favor.</p>
+          <p>In manner he is grave, almost priestly. He speaks with measured cadence, and when he smiles it is rare — and sincere. Apprentices speak of a warmth behind discipline: Lev's severity always carries care.</p>
+        `
+      }
+    ]
+  },
+
+  /* ─── VI: SACRED & FORBIDDEN ─── */
+  sacred: {
+    title: 'Sacred & Forbidden',
+    subtitle: 'ARCHIVE VI — MYSTERIES OF THE MOON',
+    epigraph: '"The Moon forgets nothing. Yet some truths are so perilous that they must be cloaked in its ashen veil."',
+    icon: `<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"><polygon points="30,4 34,18 49,18 38,27 42,42 30,34 18,42 22,27 11,18 26,18" fill="none" stroke="rgba(200,200,255,0.5)" stroke-width="1"/><circle cx="30" cy="28" r="7" fill="rgba(200,200,255,0.08)" stroke="rgba(200,200,255,0.4)" stroke-width="0.8"/><circle cx="30" cy="28" r="3" fill="rgba(200,200,255,0.3)"/></svg>`,
+    sections: [
+      {
+        id: 'carmen-velatum',
+        title: 'Carmen Velatum — Anthem of the Athenaeum',
+        content: `
+          <div class="quote-block">
+            <p>The Carmen Velatum is the sacred anthem of the Athenaeum of the Veil, a choral work in classical verse born of grief, exile, and defiant hope. It is sung in its entirety only on the most solemn occasions — commemorations of the lost, inaugurations of new Archmagisteria, and the annual remembrance held on the anniversary of the Athenaeum's founding.</p>
+          </div>
+
+          <div class="lyric-block">
+            <div class="lyric-label">Verse I — Grand Chorister</div>
+            <div class="lyric-line"><div class="lyric-latin">A luna, cara cantica, ne me in atra dedas</div><div class="lyric-translation">My moon, my beloved song, abandon me not in this dark night</div></div>
+            <div class="lyric-line"><div class="lyric-latin">Aves, ex urbe argentea, ferte indicia mea</div><div class="lyric-translation">My little doves, bring from that silver city, the song of my homeland</div></div>
+            <div class="lyric-line"><div class="lyric-latin">Aves, ferte cantam cara, ut lugeam et fata mala</div><div class="lyric-translation">My little doves, bring me a beloved song, so that we may mourn her wicked fate</div></div>
+            <div class="lyric-line"><div class="lyric-latin">Num in immundorum terra, clavus ille adhuc claudit pia</div><div class="lyric-translation">Please tell me, in that land tainted by evil, are my brothers and sisters still weeping for their destiny?</div></div>
+          </div>
+
+          <div class="lyric-block">
+            <div class="lyric-label">Verse II — Choir</div>
+            <div class="lyric-line"><div class="lyric-latin">Quando tandem carebimus tanta miseria</div><div class="lyric-translation">When shall misery pass us by, and when shall we know joy again?</div></div>
+            <div class="lyric-line"><div class="lyric-latin">Quom patria vastata nunc iacet sub urticeis</div><div class="lyric-translation">Why does our devastated homeland now lie buried under the nettles?</div></div>
+            <div class="lyric-line"><div class="lyric-latin">Ubi es, benigna domina</div><div class="lyric-translation">O Moon, benevolent mistress, where are you?</div></div>
+            <div class="lyric-line"><div class="lyric-latin">Cur non mittis lucem almam tuam</div><div class="lyric-translation">Why do you not cast your gentle radiance upon the world?</div></div>
+            <div class="lyric-line"><div class="lyric-latin">Ecce, terra infelix atra, veritas contra falsa nequit</div><div class="lyric-translation">Look at this lightless, pitiable land, truth is powerless against the venom of shadowy lies</div></div>
+            <div class="lyric-line"><div class="lyric-latin">Luna domina, quo adduces</div><div class="lyric-translation">Oh Moon, oh mistress, where are you leading us?</div></div>
+            <div class="lyric-line"><div class="lyric-latin">Pergemus quocumque adduces</div><div class="lyric-translation">We will follow your light wherever we go</div></div>
+            <div class="lyric-line"><div class="lyric-latin">Potius nox tegat lumina, quam in falsa luce esse</div><div class="lyric-translation">We would rather let the frigid night of death blind our eyes, than to sing in disgrace for a false radiance</div></div>
+          </div>
+
+          <div class="lyric-block">
+            <div class="lyric-label">Verse III — Choir</div>
+            <div class="lyric-line"><div class="lyric-latin">Carmen triste nos non canimus</div><div class="lyric-translation">We shall not sing songs of lament</div></div>
+            <div class="lyric-line"><div class="lyric-latin">Etsi flentes pro nostrorum malo</div><div class="lyric-translation">Even though our hearts be stung with sorrow</div></div>
+            <div class="lyric-line"><div class="lyric-latin">Sed non lacrima tollit dura</div><div class="lyric-translation">But what tears can wash away calamity</div></div>
+            <div class="lyric-line"><div class="lyric-latin">Patria somno non potest reddi</div><div class="lyric-translation">And what mournful dreams can bring back our homeland?</div></div>
+            <div class="lyric-line"><div class="lyric-latin">Tecta argentea voravit flamma</div><div class="lyric-translation">The silver city was devoured by flames</div></div>
+            <div class="lyric-line"><div class="lyric-latin">Illa vincta fuit pressa</div><div class="lyric-translation">She was once bound and humiliated</div></div>
+            <div class="lyric-line"><div class="lyric-latin">Sed renascetur rursum</div><div class="lyric-translation">But she will one day rise from the ashes</div></div>
+            <div class="lyric-line"><div class="lyric-latin">Redibit nos larem ducet spe</div><div class="lyric-translation">And with hope, lead her people back home</div></div>
+          </div>
+
+          <div class="lyric-block">
+            <div class="lyric-label">Refrain — Grand Chorister</div>
+            <div class="lyric-line"><div class="lyric-latin">Cur aerumnosae? — Cui aerumnosae?</div><div class="lyric-translation">Why do you mourn? — For whom do you mourn?</div></div>
+            <div class="lyric-line"><div class="lyric-latin">Cur lacrimosae? — Cui lacrimosae?</div><div class="lyric-translation">Why do you weep? — For whom do you weep?</div></div>
+          </div>
+
+          <div class="lyric-block">
+            <div class="lyric-label">Verse IV — Grand Chorister & Choir</div>
+            <div class="lyric-line"><div class="lyric-latin">Luna, claras terras lustra</div><div class="lyric-translation">Oh new moon, illuminate this land once more</div></div>
+            <div class="lyric-line"><div class="lyric-latin">Assurge, o luna, etsi tantum manent dura</div><div class="lyric-translation">Awaken, new moon, even if all that remains is torment</div></div>
+            <div class="lyric-line"><div class="lyric-latin">Et unda vasta foeda purga</div><div class="lyric-translation">Like an azure sea that washes away all evil</div></div>
+            <div class="lyric-line"><div class="lyric-latin">Sed luna ascendet, nec cora peribunt una</div><div class="lyric-translation">But the moon will rise again, and we and our hearts will not be silent</div></div>
+            <div class="lyric-line"><div class="lyric-latin">Pro turba fida spem crastinam serva</div><div class="lyric-translation">For those who believe in you and hope for tomorrow</div></div>
+            <div class="lyric-line"><div class="lyric-latin">Audies fremitus undae, postea venient gaudia</div><div class="lyric-translation">You will hear the roar of the tides, then laughter and cheer in its wake</div></div>
+          </div>
+
+          <div class="lyric-block">
+            <div class="lyric-label">Outro — All Voices</div>
+            <div class="lyric-line"><div class="lyric-latin">Sub luna rursus fiet clara terra</div><div class="lyric-translation">May the moonlit world know light once more</div></div>
+          </div>
+        `
+      },
+      {
+        id: 'archipelago',
+        title: 'The Silverlight Archipelago',
+        content: `
+          <div class="quote-block">
+            <p>"To know the Moon is to know oneself. Embrace the quiet, for it guides you."</p>
+            <p class="quote-attribution">— Isolde Metyr, explaining the purpose of the Archipelago to her son</p>
+          </div>
+
+          <div class="subsection-title">Public Knowledge</div>
+          <p>The Silverlight Archipelago is one of the most secretive institutions of the Athenaeum, its secrets privy only to the Archmagus and her Inner Circle. The entire Archipelago is surrounded by a thick redirectional mist — much like the Riftlands — and guarded by a series of automated tidal defense platforms which only Isolde herself can disable. As far as the public knows, the island could contain anything.</p>
+
+          <div class="subsection-title">True Purpose</div>
+          <p>In truth, the Silverlight Archipelago is the place where those who have learned to commune with the Moon are brought to learn the <em>true</em> side of Selenurgy. That which is taught in the Athenaeum itself is merely a token of the discipline — an illusion of normalcy. The discipline of the Plenilune has roots far more ancient and primeval than anyone can imagine.</p>
+          <p>Within the Silverlight Archipelago, Lunar energy is the strongest at any given time. Here, those who have proved themselves capable of communion with the Moon learn the truth: The Moon itself is a commanding force — not a deity, but the <span class="has-tooltip">Entelechy<span class="tooltip-text">The primeval will that shaped the world — not conscious, yet exhibiting consistent directionality</span></span>, the founding force of this world, a primeval will that has shaped all things.</p>
+
+          <div class="subsection-title">The Cathedral District</div>
+          <p>Upon the main island of the Archipelago rests a dense cluster of buildings known as the Cathedral District. Here 222 Cathedrals arise, their steeples raised skyward to frame the ethereal full moon above. All structures are piled together impossibly: stacked, leaning, intertwined by bridges and buttresses forming an architectural delirium meant to confuse, disorient, and distress the uninitiated.</p>
+          <p>One large fairway cuts through the cluster, coiling up the cliffs of the island and reaching its apex at the Grand Cathedral of Plenilunar Plenipotence — which looms tall over the rest of the valley, shining azure light upon the slender steeples of the other 221 Cathedrals, each acting as a conduit to funnel Lunar energy back into the Grand Cathedral.</p>
+
+          <div class="subsection-title">The Plenilunarchs</div>
+          <p>The masters of Lunar Sorcery who have the honor of accessing the Archipelago are known as <span class="highlight">Plenilunarchs</span>. Only they are privy to the Moon's true name: <span class="highlight highlight-gold">Ateleia</span>.</p>
+        `
+      },
+      {
+        id: 'choir',
+        title: 'The Choir',
+        content: `
+          <div class="warning-block">
+            <p>The Choir is a tolerated but unendorsed sect. Their practices are not sanctioned by the Athenaeum. Any attempt to proselytize beyond the Archipelago would be met with immediate suppression.</p>
+          </div>
+
+          <p>The Choir is an established cult — a sect of Lunar Sorcerers whose history diverged from the Metyrians centuries ago, when their cloister was gripped by famine, fear, and paranoia so great it culminated in an event of mass hysteria, leading to a third of their own being butchered and drained of blood. This grim tale marks the beginning of their obsession with the sanguine arts.</p>
+
+          <div class="subsection-title">Their Doctrines</div>
+          <p>At the heart of the Choir's dogma lies a single conviction: the <span class="highlight" style="color:rgba(200,100,100,0.8);">Blood Moon</span> is the most honest face of the Entelechy — the raw, unfiltered pulse of creation. For them, the Full Moon revered by the Metyrians is merely the surface. But the Blood Moon is the <em>heart</em>, and its crimson illumination reveals truths obscured by the blinding serenity of the Full Moon.</p>
+
+          <div class="tenet-block" style="border-color:rgba(150,50,50,0.2);background:rgba(20,8,8,0.5);">
+            <div class="tenet-label">First Sacred Tenet — The Pulse of Truth</div>
+            <p class="tenet-text">The Moon's will is not serene but thrumming and alive; only through blood can its rhythm be understood.</p>
+          </div>
+          <div class="tenet-block" style="border-color:rgba(150,50,50,0.2);background:rgba(20,8,8,0.5);">
+            <div class="tenet-label">Second Sacred Tenet — Communion Through Sacrifice</div>
+            <p class="tenet-text">Not the sacrifice of life, but of vitality: the giving of blood, the surrendering of one's weakness, the exposure of one's essence to lunar scrutiny.</p>
+          </div>
+          <div class="tenet-block" style="border-color:rgba(150,50,50,0.2);background:rgba(20,8,8,0.5);">
+            <div class="tenet-label">Third Sacred Tenet — Resonance is Divinity</div>
+            <p class="tenet-text">To sing beneath the Blood Moon is to allow one's body and soul to vibrate in harmony with the Entelechy, revealing inner truths and unmasking falsehoods buried within the self.</p>
+          </div>
+
+          <div class="subsection-title">Hierarchy</div>
+          <div class="hierarchy-tree">
+            <div class="hierarchy-node"><div class="hierarchy-node-title">The Cantor Primus</div><div class="hierarchy-node-desc">The eldest and most lucid among them, chosen not by appointment but by the Moon's verdict: the individual whose blood darkens deepest under the Blood Moon's glow.</div></div>
+            <div class="hierarchy-node"><div class="hierarchy-node-title">The Nine Resonants</div><div class="hierarchy-node-desc">Senior scholars overseeing the doctrinal pillars: ritual music, blood-alchemy, lunar metaphysics, celestial cartography, and the surgical arts.</div></div>
+            <div class="hierarchy-node"><div class="hierarchy-node-title">The Acolytes of the Vein</div><div class="hierarchy-node-desc">Carry out the practical labor: maintaining the cathedrals, charting blood properties, collecting lunar measurements, and preparing for the Chorus — a rite of passage to prove themselves capable of channeling the Blood Moon without succumbing to frenzy.</div></div>
+          </div>
+
+          <div class="subsection-title">Internal Divisions</div>
+          <div class="rank-item"><div class="rank-name">The Purists</div><div class="rank-desc">Believe the Choir must remain isolated forever, lest external influence contaminate lunar truth.</div></div>
+          <div class="rank-item"><div class="rank-name">The Surgeons</div><div class="rank-desc">Favor greater collaboration with the Athenaeum, arguing that shared knowledge would accelerate their understanding of lunar physiology.</div></div>
+          <div class="rank-item"><div class="rank-name">The Heralds</div><div class="rank-desc">A small but growing sect believing the Blood Moon is a warning rather than a blessing — that a great lunar event is imminent. Watched closely, for their apocalyptic rhetoric verges uncomfortably on extremism Isolde would no longer tolerate.</div></div>
+
+          <div class="subsection-title">Their Greatest Secret</div>
+          <div class="forbidden-block">
+            <p>Deep within the Hemotheca lies their most guarded discovery: evidence that the Blood Moon's appearance is <em>not natural</em>. According to ancient records, the Moon was once entirely pale. The earliest known Blood Moon coincides with a cataclysmic event — something powerful enough to scorch the lunar surface with a stain that has never faded.</p>
+            <p>The Choir believes this "Scar of the Entelechy" is not merely a mark but a <em>memory</em> — a cosmic wound that still bleeds its influence into the world. What caused it, they do not know. But they are certain of one thing: <span class="highlight" style="color:rgba(200,120,120,0.9);">whatever scarred the Moon is not gone.</span></p>
+          </div>
+        `
+      },
+      {
+        id: 'trilune',
+        title: 'The Trilune Trinity',
+        content: `
+          <p style="font-family:var(--font-heading);font-size:0.7rem;letter-spacing:0.35em;color:var(--silver-dim);margin-bottom:1.5rem;text-align:center;">DE NATURA LUNAE ET VOLUNTATE PRISTINA<br><em style="font-size:0.65rem;letter-spacing:0.2em;">"Preconscious, Prescient, Perfect"</em></p>
+
+          <div class="subsection-title">The Celestial Body</div>
+          <p>The uninitiated may mistake the Moon that one sees in the sky as the source and font of all lunar energy — however this is a grave misconception. The Moon as we know it is no more than a gear in a greater cosmic mechanism: a physical satellite whose mass, orbit, and reflective properties allow it to focalize a far greater metaphysical pressure exerted upon the cosmos. This pressure, referred to as the <span class="highlight">Primordial Will</span>, is not conscious, sentient, nor self-aware, yet exhibits consistent directionality and structural consequence.</p>
+
+          <div class="subsection-title">The Three Components</div>
+
+          <div class="tenet-block">
+            <div class="tenet-label">The Moon</div>
+            <p class="tenet-text">Earth's satellite. Inert catalyst. Functions as resonant architecture — its orbit creates a rhythmic stress on the fugue fabric of the Primordial Will. Speculation offers that planets without satellites experience the Primordial Will as diffused, unfocused, and largely inert.</p>
+          </div>
+
+          <div class="tenet-block">
+            <div class="tenet-label">The Primordial Will</div>
+            <p class="tenet-text">Pure energy and intent. Not conscious, yet exhibiting consistent directionality and structural consequence. The foundational metaphysical pressure that the Moon focalizes and through which all Lunar Sorcery draws its power.</p>
+          </div>
+
+          <div class="tenet-block">
+            <div class="tenet-label" style="color:var(--gold-moon);">Ateleia</div>
+            <p class="tenet-text">Distinct from both. Ateleia is an Entity — as ancient as it is inexplicable. It seems to hold no will of its own, moving according to the designs and pulsations of the Primordial Will. It is as tantamount to a deity as Lunar sorcerers will ever come across. The Moon is an inert catalyst; the Primordial Will is pure energy and intent; Ateleia, however, is a <em>being</em>. This syncretism is not yet understandable with current tools, and is taken as an axiom of Selenurgic doctrines until evidence points otherwise.</p>
+          </div>
+
+          <p>The synthesis of these three is called the <span class="highlight highlight-gold">Trilune Trinity</span>. It is the central mystery of advanced Selenurgy, known in its fullness only to the Plenilunarchs — those who have achieved true communion with the Moon and are privy to Ateleia's true name.</p>
+
+          <div class="moon-divider">◈</div>
+
+          <div class="forbidden-block">
+            <p style="font-family:var(--font-heading);font-size:0.65rem;letter-spacing:0.3em;margin-bottom:1rem;">THE SANGUINE ANOMALY — HEAVILY RESTRICTED</p>
+            <p>The Blood Moon's anomalous properties are acknowledged within Selenurgic studies, however the practices of the <span class="redacted">████</span> related to them are neither sanctioned nor tolerated under any doctrine recognized by the Athenaeum.</p>
+            <p>Any attempt to initiate communion with <span class="redacted">██████</span> will be met with immediate and extreme disciplinary action.</p>
+            <p>This prohibition is reiterated without exception: do NOT attempt to seek understanding within the depths of the Blood Moon. The <span class="redacted">█████████</span> have attempted, and the disastrous consequences require no elaboration. The names of those lost in this pursuit shall be recorded hereon — their absence is sufficient evidence.</p>
+            <p style="font-family:var(--font-heading);font-size:0.65rem;letter-spacing:0.25em;color:rgba(150,100,100,0.6);margin-top:1rem;text-align:center;">NO FURTHER RECORD AUTHORIZED — THIS ENDS WHERE THEY DID</p>
+          </div>
+        `
+      },
+      {
+        id: 'forbidden-arts',
+        title: 'The Forbidden Sorceries',
+        content: `
+          <div class="forbidden-block">
+            <p style="font-family:var(--font-heading);font-size:0.65rem;letter-spacing:0.35em;text-align:center;margin-bottom:1.5rem;color:rgba(180,100,100,0.8);">ERASURE OF THE LOST ARTS</p>
+            <div class="quote-block" style="border-color:rgba(150,50,50,0.2);margin:0 0 1.5rem;">
+              <p>"The Moon forgets nothing. Yet some truths are so perilous that they must be cloaked in its ashen veil."</p>
+              <p class="quote-attribution">— Thus Isolde saith upon destroying the codices containing the Lost Arts of Lunar Magic, and sealing their knowledge within a glyph that to this day brands her flesh. Now none may cast these abhorrent spells.</p>
+            </div>
+            <p>The Forbidden Sorceries are a forgotten branch of Lunar Sorceries which Isolde agreed must be destroyed. The erasure of these sorceries was the one and only time when Lunar Sorcerers and the Aetherian Inquisitions worked toward the same goal, circa the first years after the legalization of Lunar Sorceries. No practitioners remain, and all information — save for cautionary tales — has been lost. The Archmagus took it upon herself to prevent the rise of this sect once and for all by personally sealing all related power within her own body: an unprecedented feat.</p>
+          </div>
+
+          <div class="warning-block" style="margin-top:2rem;">
+            <p style="font-family:var(--font-heading);font-size:0.7rem;letter-spacing:0.2em;margin-bottom:0.5rem;">LAMENT OF THE SECOND TWILIGHT</p>
+            <p style="color:rgba(200,150,150,0.8);">Believed to have been attempted by Isolde's predecessor — <span class="highlight" style="color:rgba(200,100,100,0.9);">Amonhorah, the Great Blasphemer</span> — with the purpose of calling a new celestial body into orbit and swallowing the Aetherian Continent beneath the tides.</p>
+          </div>
+
+          <div class="warning-block">
+            <p style="font-family:var(--font-heading);font-size:0.7rem;letter-spacing:0.2em;margin-bottom:0.5rem;">CHIAROSCURO GENESIS</p>
+            <p style="color:rgba(200,150,150,0.8);">An attempt by a now-extinct sect of ancient lunar sorcerers to create new life from pure magic. The result was a terrifying eidolon who consumed the identities and souls of its creators, for it lacked its own. It was Isolde herself who destroyed the abomination.</p>
+          </div>
+
+          <div class="warning-block">
+            <p style="font-family:var(--font-heading);font-size:0.7rem;letter-spacing:0.2em;margin-bottom:0.5rem;">ELEGY TO A DEAD SUN</p>
+            <p style="color:rgba(200,150,150,0.8);">A sorcery so utterly blasphemous it exists only in theory, yet even the concept of it scared Isolde so deeply she saw it fit to seal the knowledge within the glyph. Its objective, should it have been made, would have been to cloak the sun itself in a lattice of pure darkness, sealing its light evermore — causing the end of life on Earth.</p>
+          </div>
+
+          <p style="font-family:var(--font-heading);font-size:0.7rem;letter-spacing:0.3em;text-align:center;color:rgba(150,100,100,0.5);margin-top:3rem;">NONE MAY EVER KNOW OF THESE SORCERIES, LET ALONE MASTER THEM</p>
+        `
+      }
+    ]
+  }
+};
+
+/* ═══════════════════════════════════════════════════
+   OPEN ARCHIVE
+═══════════════════════════════════════════════════ */
+function openArchive(catId) {
+  const data = archiveData[catId];
+  if (!data) return;
+
+  const main = $('archiveMain');
+  const navItems = $('navItems');
+  const navTitle = $('navTitle');
+
+  navTitle.textContent = data.title;
+
+  // Build nav
+  navItems.innerHTML = '';
+  const label = mk('div', 'nav-label', 'Sections');
+  navItems.appendChild(label);
+
+  data.sections.forEach((sec, i) => {
+    const item = mk('a', 'nav-item', sec.title);
+    item.href = '#sec-' + sec.id;
+    item.addEventListener('click', e => {
+      e.preventDefault();
+      document.getElementById('sec-' + sec.id)?.scrollIntoView({ behavior: 'smooth' });
+      // update active
+      navItems.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
+      item.classList.add('active');
+    });
+    if (i === 0) item.classList.add('active');
+    navItems.appendChild(item);
+  });
+
+  // Build content
+  main.innerHTML = `
+    <div class="archive-page-header animate-in">
+      <div class="archive-page-icon">${data.icon}</div>
+      <div class="archive-page-label">${data.subtitle}</div>
+      <h1 class="archive-page-title">${data.title}</h1>
+      <p class="archive-page-epigraph">${data.epigraph}</p>
+    </div>
+  `;
+
+  data.sections.forEach((sec, i) => {
+    const section = document.createElement('div');
+    section.className = 'archive-section';
+    section.id = 'sec-wrap-' + sec.id;
+    section.innerHTML = `
+      <span id="sec-${sec.id}" class="section-anchor"></span>
+      <div class="section-header">
+        <span class="section-number">0${i+1}</span>
+        <h2 class="section-title">${sec.title}</h2>
+        <div class="section-line"></div>
+      </div>
+      ${sec.content}
+      <div class="moon-divider">☽</div>
+    `;
+    main.appendChild(section);
+  });
+
+  // Intersection observer for reveal animations
+  setTimeout(() => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.08 });
+
+    main.querySelectorAll('.archive-section').forEach(el => observer.observe(el));
+  }, 100);
+
+  // Show page
+  showPage('page-archive');
+  main.scrollTop = 0;
+  $('page-archive').scrollTop = 0;
+
+  // Scroll progress
+  const archivePage = $('page-archive');
+  archivePage.addEventListener('scroll', updateScrollProgress);
+  function updateScrollProgress() {
+    const scrollTop = main.scrollTop;
+    const scrollHeight = main.scrollHeight - main.clientHeight;
+    const progress = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
+    const prog = $('scrollProgress');
+    if (prog) prog.style.width = progress + '%';
+
+    // Update active nav item based on scroll
+    const sections = data.sections.map(s => document.getElementById('sec-' + s.id));
+    let activeIdx = 0;
+    sections.forEach((el, i) => {
+      if (el) {
+        const rect = el.getBoundingClientRect();
+        if (rect.top < 200) activeIdx = i;
+      }
+    });
+    const navLinks = navItems.querySelectorAll('.nav-item');
+    navLinks.forEach((link, i) => {
+      link.classList.toggle('active', i === activeIdx);
+    });
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   BACK BUTTON
+═══════════════════════════════════════════════════ */
+document.getElementById('navBackBtn')?.addEventListener('click', () => {
+  showPage('page-home');
+  $('page-archive').scrollTop = 0;
+  const main = $('archiveMain');
+  if (main) main.scrollTop = 0;
+});
+</script>
+</body>
+</html>
